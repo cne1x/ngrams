@@ -2,8 +2,9 @@ package org.eichelberger.ngram
 
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeZone, DateTime}
+import java.util.TimeZone
 
-object NGramDateTime extends SegmentLike[DateTime, String] {
+object SegmentDateTime extends SegmentLike[DateTime, String] {
   val StartPart = "_BOS_"
 
   val EndPart = "_EOS_"
@@ -19,5 +20,17 @@ object NGramDateTime extends SegmentLike[DateTime, String] {
 
   def disassemble(whole: DateTime): Iterator[String] =
     whole.getMillis.toString.map(_.toString).iterator
+
+  def useUTC {
+    val tz = TimeZone.getTimeZone("UTC")
+    TimeZone.setDefault(tz)
+  }
+  useUTC
+
+  val UTC = DateTimeZone.forID("UTC")
+
+  def dt2s(dt: DateTime): String = dtf.withZone(UTC).print(dt)
+
+  def s2dt(s: String): DateTime = dtf.parseDateTime(s).withZone(UTC)
 }
 

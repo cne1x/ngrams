@@ -7,7 +7,7 @@ import org.joda.time.{DateTimeZone, DateTime}
 
 @RunWith(classOf[JUnitRunner])
 class NGramDateTimeTest extends Specification {
-  implicit val obj = NGramDateTime
+  implicit val obj = SegmentDateTime
   val windowSize = 5
 
   "empty ngram" should {
@@ -23,6 +23,8 @@ class NGramDateTimeTest extends Specification {
 
       val ngram = NGram.fromWhole(dtIn, windowSize)
       ngram must not beNull
+
+      ngram.prettyPrint()
 
       val dtOut = ngram.sample
       dtOut must be equalTo dtIn

@@ -74,6 +74,9 @@
         </executions>
         <configuration>
           <scalaVersion>${scala.version}</scalaVersion>
+          <jvmArgs>
+              <jvmArg>-Duser.timezone=GMT</jvmArg>
+          </jvmArgs>
         </configuration>
       </plugin>
       <plugin>
