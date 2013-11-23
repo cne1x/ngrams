@@ -4,7 +4,29 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTimeZone, DateTime}
 
 object NGramDateTime extends SegmentLike[DateTime, String] {
-  val dtf = DateTimeFormat.forPattern("yyyyMMddHHmmss.SSS")
+  case class DateCharPart(dtfChar: Char, subIndex: Int)
+
+  val dateDefinition = List[DateCharPart](
+    DateCharPart('y', 0),
+    DateCharPart('y', 1),
+    DateCharPart('y', 2),
+    DateCharPart('y', 3),
+    DateCharPart('M', 0),
+    DateCharPart('M', 1),
+    DateCharPart('d', 0),
+    DateCharPart('d', 1),
+    DateCharPart('H', 0),
+    DateCharPart('H', 1),
+    DateCharPart('m', 0),
+    DateCharPart('m', 1),
+    DateCharPart('s', 0),
+    DateCharPart('s', 1),
+    DateCharPart('S', 0),
+    DateCharPart('S', 1),
+    DateCharPart('S', 2)
+  )
+
+  val dtf = DateTimeFormat.forPattern(dateDefinition.map(_.dtfChar).mkString)
 
   val StartPart = "_BOS_"
 

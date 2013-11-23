@@ -8,7 +8,7 @@
     <file path="/NGramGeohash.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385215591192" ignored="false" />
     <file path="/pom.xml" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385216483833" ignored="false" />
     <file path="/README.md" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385219305630" ignored="false" />
-    <file path="/NGramDateTime.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385220344561" ignored="false" />
+    <file path="/NGramDateTime.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385220924378" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +117,7 @@
       <file leaf-file-name="NGramDateTime.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="2" selection-start="736" selection-end="736" vertical-scroll-proportion="0.4922049">
+            <state line="40" column="23" selection-start="1062" selection-end="1062" vertical-scroll-proportion="0.62138087">
               <folding>
                 <element signature="e#32#74#0" expanded="true" />
               </folding>
@@ -403,24 +403,6 @@
               <option name="myItemType" value="org.jetbrains.plugins.scala.components.ScalaDefsProjectViewProvider$ScalaFileTreeNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ngrams" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ngrams" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
       <pane id="PackagesPane" />
@@ -623,7 +605,7 @@
     <option name="INCLUDE_TEXT_INTO_PATCH" value="false" />
     <option name="INCLUDE_TEXT_INTO_SHELF" value="false" />
     <option name="SHOW_FILE_HISTORY_DETAILS" value="true" />
-    <option name="SHOW_VCS_ERROR_NOTIFICATIONS" value="true" />
+    <option name="SHOW_VCS_ERROR_NOTIFICATIONS" value="false" />
     <option name="SHOW_DIRTY_RECURSIVELY" value="false" />
     <option name="LIMIT_HISTORY" value="true" />
     <option name="MAXIMUM_HISTORY_ROWS" value="1000" />
@@ -738,7 +720,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="2" selection-start="736" selection-end="736" vertical-scroll-proportion="0.4922049">
+        <state line="40" column="23" selection-start="1062" selection-end="1062" vertical-scroll-proportion="0.62138087">
           <folding>
             <element signature="e#32#74#0" expanded="true" />
           </folding>
