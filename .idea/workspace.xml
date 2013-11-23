@@ -5,11 +5,12 @@
     <ignored path="ngrams.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/NGram.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385215412013" ignored="false" />
-    <file path="/NGramGeohash.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385215591192" ignored="false" />
+    <file path="/NGramGeohash.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385222429295" ignored="false" />
     <file path="/pom.xml" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385222237769" ignored="false" />
     <file path="/README.md" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385221372399" ignored="false" />
     <file path="/NGramDateTime.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385221567426" ignored="false" />
     <file path="/NGramStringTest.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385222260807" ignored="false" />
+    <file path="/NGramDateTimeTest.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385222786630" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,16 +110,16 @@
       <file leaf-file-name="NGramGeohash.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramGeohash.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="70" selection-start="262" selection-end="262" vertical-scroll-proportion="0.0">
+            <state line="5" column="0" selection-start="127" selection-end="127" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NGramDateTime.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="NGramDateTime.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="12" column="34" selection-start="291" selection-end="291" vertical-scroll-proportion="0.34343433">
               <folding>
                 <element signature="e#32#74#0" expanded="true" />
               </folding>
@@ -126,10 +127,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NGramStringTest.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramStringTest.scala">
+      <file leaf-file-name="NGramDateTimeTest.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramDateTimeTest.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="26" selection-start="268" selection-end="268" vertical-scroll-proportion="0.3148148">
+            <state line="23" column="42" selection-start="625" selection-end="625" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#32#59#0" expanded="true" />
               </folding>
@@ -157,13 +158,14 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramString.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramGeohash.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/SegmentLike.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGram.scala" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramStringTest.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramGeohash.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramDateTimeTest.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala" />
       </list>
     </option>
   </component>
@@ -372,36 +374,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="NGramGeohash.scala" />
-              <option name="myItemType" value="org.jetbrains.plugins.scala.components.ScalaDefsProjectViewProvider$ScalaFileTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ngrams" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ngrams" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ngram" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="NGram.scala" />
               <option name="myItemType" value="org.jetbrains.plugins.scala.components.ScalaDefsProjectViewProvider$ScalaFileTreeNode" />
             </PATH_ELEMENT>
@@ -469,6 +441,19 @@
           </MavenRunnerParameters>
         </option>
       </MavenSettings>
+      <method />
+    </configuration>
+    <configuration default="true" type="Specs2RunConfiguration" factoryName="Specs2">
+      <module name="" />
+      <setting name="path" value="" />
+      <setting name="package" value="" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="workingDirectory" value="$PROJECT_DIR$" />
+      <setting name="searchForTest" value="Across module dependencies" />
+      <setting name="testName" value="" />
+      <setting name="testKind" value="Class" />
+      <setting name="showProgressMessages" value="true" />
       <method />
     </configuration>
     <configuration default="true" type="Remote" factoryName="Remote">
@@ -706,26 +691,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramGeohash.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="70" selection-start="262" selection-end="262" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="text-editor">
         <state line="10" column="18" selection-start="496" selection-end="496" vertical-scroll-proportion="0.0">
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#32#74#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -745,9 +714,34 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramStringTest.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="26" selection-start="268" selection-end="268" vertical-scroll-proportion="0.3148148">
+        <state line="9" column="5" selection-start="213" selection-end="213" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#32#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramGeohash.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="0" selection-start="127" selection-end="127" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramDateTimeTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="42" selection-start="625" selection-end="625" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#32#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="34" selection-start="291" selection-end="291" vertical-scroll-proportion="0.34343433">
+          <folding>
+            <element signature="e#32#74#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -10,7 +10,7 @@ object NGramDateTime extends SegmentLike[DateTime, String] {
 
   def emptyPart = ""
 
-  def emptyWhole = new DateTime(Long.MinValue, DateTimeZone.forID("UTC"))
+  def emptyWhole = new DateTime(0L, DateTimeZone.forID("UTC"))
 
   val dtf = DateTimeFormat.forPattern("yyyyMMddHHmmssSSS")
 
