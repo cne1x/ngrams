@@ -4,7 +4,7 @@
     <list default="true" id="88de0857-4735-4ac0-b622-9aa1888a1c10" name="Default" comment="" />
     <ignored path="ngrams.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/NGram.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385235258895" ignored="false" />
+    <file path="/NGram.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385243697504" ignored="false" />
     <file path="/NGramGeohash.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385222429295" ignored="false" />
     <file path="/pom.xml" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385228536477" ignored="false" />
     <file path="/README.md" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385221372399" ignored="false" />
@@ -12,6 +12,8 @@
     <file path="/NGramStringTest.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385222260807" ignored="false" />
     <file path="/NGramDateTimeTest.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385224720681" ignored="false" />
     <file path="/GDELTTEst.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385236494714" ignored="false" />
+    <file path="/SegmentSentence.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385243948516" ignored="false" />
+    <file path="/SegmentSentenceTest.scala" changelist="88de0857-4735-4ac0-b622-9aa1888a1c10" time="1385245252213" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +28,6 @@
     <disable_hints />
   </component>
   <component name="DebuggerManager">
-    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <breakpoint_any default_suspend_policy="SuspendAll" default_condition_enabled="true">
       <breakpoint>
         <option name="NOTIFY_CAUGHT" value="true" />
@@ -63,6 +64,7 @@
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
     </breakpoint_any>
+    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <breakpoint_rules />
     <ui_properties />
   </component>
@@ -72,24 +74,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="pom.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="72" column="17" selection-start="2423" selection-end="2423" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="README.md" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="38" selection-start="342" selection-end="367" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="NGramGeohash.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramGeohash.scala">
           <provider selected="true" editor-type-id="text-editor">
@@ -99,10 +83,30 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="NGramStringTest.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramStringTest.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="8" column="6" selection-start="0" selection-end="281" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SegmentSentenceTest.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/SegmentSentenceTest.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="87" column="14" selection-start="2544" selection-end="2544" vertical-scroll-proportion="0.58464223">
+              <folding>
+                <element signature="e#32#59#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="NGram.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGram.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="111" column="34" selection-start="4923" selection-end="4923" vertical-scroll-proportion="0.0">
+            <state line="253" column="15" selection-start="10647" selection-end="10654" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -111,7 +115,7 @@
       <file leaf-file-name="SegmentLike.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/SegmentLike.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="13" column="6" selection-start="437" selection-end="437" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -120,32 +124,26 @@
       <file leaf-file-name="NGramDateTime.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="27" column="2" selection-start="753" selection-end="753" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#32#74#0" expanded="true" />
-              </folding>
+            <state line="11" column="33" selection-start="283" selection-end="283" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NGramDateTimeTest.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramDateTimeTest.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="0" selection-start="585" selection-end="637" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#32#59#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GDELTTEst.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="GDELTTEst.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/GDELTTEst.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="148" column="27" selection-start="5137" selection-end="5137" vertical-scroll-proportion="0.6010101">
-              <folding>
-                <element signature="e#32#68#0" expanded="true" />
-              </folding>
+            <state line="14" column="0" selection-start="385" selection-end="428" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SegmentSentence.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/SegmentSentence.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="11" column="19" selection-start="467" selection-end="467" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -153,7 +151,7 @@
       <file leaf-file-name="NGramString.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramString.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="24" selection-start="444" selection-end="444" vertical-scroll-proportion="0.0">
+            <state line="12" column="21" selection-start="99" selection-end="505" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -178,8 +176,10 @@
         <option value="$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramDateTimeTest.scala" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGram.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/GDELTTEst.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/SegmentSentence.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGram.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/SegmentSentenceTest.scala" />
       </list>
     </option>
   </component>
@@ -243,7 +243,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -439,40 +438,11 @@
               <option name="myItemId" value="main" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ngram" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="NGram.scala" />
-              <option name="myItemType" value="org.jetbrains.plugins.scala.components.ScalaDefsProjectViewProvider$ScalaFileTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ngrams" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ngrams" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -490,10 +460,10 @@
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
   </component>
-  <component name="RunManager" selected="Specs2.GDELTTest">
-    <configuration default="false" name="GDELTTest" type="Specs2RunConfiguration" factoryName="Specs2" temporary="true">
+  <component name="RunManager" selected="Specs2.SegmentSentenceTest">
+    <configuration default="false" name="SegmentSentenceTest" type="Specs2RunConfiguration" factoryName="Specs2" temporary="true">
       <module name="ngrams" />
-      <setting name="path" value="org.eichelberger.ngram.GDELTTest" />
+      <setting name="path" value="org.eichelberger.ngram.SegmentSentenceTest" />
       <setting name="package" value="" />
       <setting name="vmparams" value="" />
       <setting name="params" value="" />
@@ -502,62 +472,64 @@
       <setting name="testName" value="" />
       <setting name="testKind" value="Class" />
       <setting name="showProgressMessages" value="true" />
-      <RunnerSettings RunnerId="Debug">
-        <option name="DEBUG_PORT" value="" />
-        <option name="TRANSPORT" value="0" />
-        <option name="LOCAL" value="true" />
-      </RunnerSettings>
-      <RunnerSettings RunnerId="Run" />
-      <ConfigurationWrapper RunnerId="Debug" />
-      <ConfigurationWrapper RunnerId="Run" />
-      <method />
-    </configuration>
-    <configuration default="false" name="GDELTTest" type="JUnit" factoryName="JUnit" temporary="true">
-      <module name="ngrams" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="org.eichelberger.ngram" />
-      <option name="MAIN_CLASS_NAME" value="org.eichelberger.ngram.GDELTTest" />
-      <option name="METHOD_NAME" />
-      <option name="TEST_OBJECT" value="class" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
-      </option>
-      <envs />
-      <patterns />
       <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Run" />
       <method />
     </configuration>
-    <configuration default="false" name="org.eichelberger.ngram.GDELTTest::resources/gdelt-50K.tsv" type="Specs2RunConfiguration" factoryName="Specs2" temporary="true">
+    <configuration default="false" name="org.eichelberger.ngram.SegmentSentenceTest::HuckFinn-Chapter1" type="Specs2RunConfiguration" factoryName="Specs2" temporary="true">
       <module name="ngrams" />
-      <setting name="path" value="org.eichelberger.ngram.GDELTTest" />
+      <setting name="path" value="org.eichelberger.ngram.SegmentSentenceTest" />
       <setting name="package" value="" />
-      <setting name="vmparams" value=" -Dspecs2.ex=&quot;resources/gdelt-50K.tsv&quot;" />
+      <setting name="vmparams" value=" -Dspecs2.ex=&quot;HuckFinn-Chapter1&quot;" />
       <setting name="params" value="" />
       <setting name="workingDirectory" value="$PROJECT_DIR$" />
       <setting name="searchForTest" value="Across module dependencies" />
-      <setting name="testName" value="resources/gdelt-50K.tsv" />
+      <setting name="testName" value="HuckFinn-Chapter1" />
       <setting name="testKind" value="Test name" />
       <setting name="showProgressMessages" value="true" />
       <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Run" />
       <method />
     </configuration>
-    <configuration default="false" name="org.eichelberger.ngram.GDELTTest::Unicode" type="Specs2RunConfiguration" factoryName="Specs2" temporary="true">
+    <configuration default="false" name="org.eichelberger.ngram.SegmentSentenceTest::PrideAndPrejudice-Chapter1" type="Specs2RunConfiguration" factoryName="Specs2" temporary="true">
       <module name="ngrams" />
-      <setting name="path" value="org.eichelberger.ngram.GDELTTest" />
+      <setting name="path" value="org.eichelberger.ngram.SegmentSentenceTest" />
       <setting name="package" value="" />
-      <setting name="vmparams" value=" -Dspecs2.ex=&quot;Unicode&quot;" />
+      <setting name="vmparams" value=" -Dspecs2.ex=&quot;PrideAndPrejudice-Chapter1&quot;" />
       <setting name="params" value="" />
       <setting name="workingDirectory" value="$PROJECT_DIR$" />
       <setting name="searchForTest" value="Across module dependencies" />
-      <setting name="testName" value="Unicode" />
+      <setting name="testName" value="PrideAndPrejudice-Chapter1" />
+      <setting name="testKind" value="Test name" />
+      <setting name="showProgressMessages" value="true" />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method />
+    </configuration>
+    <configuration default="false" name="org.eichelberger.ngram.SegmentSentenceTest::Frankenstein-Chapter2" type="Specs2RunConfiguration" factoryName="Specs2" temporary="true">
+      <module name="ngrams" />
+      <setting name="path" value="org.eichelberger.ngram.SegmentSentenceTest" />
+      <setting name="package" value="" />
+      <setting name="vmparams" value=" -Dspecs2.ex=&quot;Frankenstein-Chapter2&quot;" />
+      <setting name="params" value="" />
+      <setting name="workingDirectory" value="$PROJECT_DIR$" />
+      <setting name="searchForTest" value="Across module dependencies" />
+      <setting name="testName" value="Frankenstein-Chapter2" />
+      <setting name="testKind" value="Test name" />
+      <setting name="showProgressMessages" value="true" />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method />
+    </configuration>
+    <configuration default="false" name="org.eichelberger.ngram.SegmentSentenceTest::CaskOfAmontillado" type="Specs2RunConfiguration" factoryName="Specs2" temporary="true">
+      <module name="ngrams" />
+      <setting name="path" value="org.eichelberger.ngram.SegmentSentenceTest" />
+      <setting name="package" value="" />
+      <setting name="vmparams" value=" -Dspecs2.ex=&quot;CaskOfAmontillado&quot;" />
+      <setting name="params" value="" />
+      <setting name="workingDirectory" value="$PROJECT_DIR$" />
+      <setting name="searchForTest" value="Across module dependencies" />
+      <setting name="testName" value="CaskOfAmontillado" />
       <setting name="testKind" value="Test name" />
       <setting name="showProgressMessages" value="true" />
       <RunnerSettings RunnerId="Run" />
@@ -592,6 +564,14 @@
       </MavenSettings>
       <method />
     </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+      <method />
+    </configuration>
     <configuration default="true" type="Specs2RunConfiguration" factoryName="Specs2">
       <module name="" />
       <setting name="path" value="" />
@@ -605,12 +585,17 @@
       <setting name="showProgressMessages" value="true" />
       <method />
     </configuration>
-    <configuration default="true" type="Remote" factoryName="Remote">
-      <option name="USE_SOCKET_TRANSPORT" value="true" />
-      <option name="SERVER_MODE" value="false" />
-      <option name="SHMEM_ADDRESS" value="javadebug" />
-      <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
@@ -638,19 +623,6 @@
       <envs />
       <properties />
       <listeners />
-      <method />
-    </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -687,18 +659,20 @@
       <patterns />
       <method />
     </configuration>
-    <list size="4">
-      <item index="0" class="java.lang.String" itemvalue="Specs2.GDELTTest" />
-      <item index="1" class="java.lang.String" itemvalue="JUnit.GDELTTest" />
-      <item index="2" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.GDELTTest::resources/gdelt-50K.tsv" />
-      <item index="3" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.GDELTTest::Unicode" />
+    <list size="5">
+      <item index="0" class="java.lang.String" itemvalue="Specs2.SegmentSentenceTest" />
+      <item index="1" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.SegmentSentenceTest::HuckFinn-Chapter1" />
+      <item index="2" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.SegmentSentenceTest::PrideAndPrejudice-Chapter1" />
+      <item index="3" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.SegmentSentenceTest::Frankenstein-Chapter2" />
+      <item index="4" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.SegmentSentenceTest::CaskOfAmontillado" />
     </list>
     <recent_temporary>
-      <list size="4">
-        <item index="0" class="java.lang.String" itemvalue="Specs2.GDELTTest" />
-        <item index="1" class="java.lang.String" itemvalue="JUnit.GDELTTest" />
-        <item index="2" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.GDELTTest::Unicode" />
-        <item index="3" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.GDELTTest::resources/gdelt-50K.tsv" />
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Specs2.SegmentSentenceTest" />
+        <item index="1" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.SegmentSentenceTest::CaskOfAmontillado" />
+        <item index="2" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.SegmentSentenceTest::Frankenstein-Chapter2" />
+        <item index="3" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.SegmentSentenceTest::PrideAndPrejudice-Chapter1" />
+        <item index="4" class="java.lang.String" itemvalue="Specs2.org.eichelberger.ngram.SegmentSentenceTest::HuckFinn-Chapter1" />
       </list>
     </recent_temporary>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
@@ -806,92 +780,39 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$PROJECT_DIR$/src/main/resources/geomesa-distributed-runtime-1.0.0-SNAPSHOT.jar!/org/joda/time/format/DateTimeFormatter.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="102" column="34" selection-start="5097" selection-end="5097" vertical-scroll-proportion="0.6336449">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="72" column="17" selection-start="2423" selection-end="2423" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.6.0_38/src.zip!/java/io/FileReader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="13" selection-start="761" selection-end="761" vertical-scroll-proportion="0.56369984">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.6.0_38/src.zip!/java/io/InputStream.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="349" column="22" selection-start="15310" selection-end="15310" vertical-scroll-proportion="0.82198954">
-          <folding />
-        </state>
+        <state line="349" column="22" selection-start="15310" selection-end="15310" vertical-scroll-proportion="0.82198954" />
       </provider>
     </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.6.0_38/src.zip!/java/io/BufferedInputStream.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="165" column="6" selection-start="5846" selection-end="5846" vertical-scroll-proportion="0.35602096">
-          <folding />
-        </state>
+        <state line="165" column="6" selection-start="5846" selection-end="5846" vertical-scroll-proportion="0.35602096" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramDateTimeTest.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="0" selection-start="585" selection-end="637" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#32#59#0" expanded="true" />
-          </folding>
-        </state>
+        <state line="24" column="0" selection-start="585" selection-end="637" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.3/scala-library-2.10.3.jar!/scala/io/Source.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="67" column="6" selection-start="5070" selection-end="5070" vertical-scroll-proportion="0.6354379">
-          <folding />
-        </state>
+        <state line="67" column="6" selection-start="5070" selection-end="5070" vertical-scroll-proportion="0.6354379" />
       </provider>
     </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/org/specs2/specs2_2.10/2.3.4/specs2_2.10-2.3.4.jar!/org/specs2/matcher/Expectable.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="0" selection-start="1956" selection-end="1956" vertical-scroll-proportion="0.4623218">
-          <folding />
-        </state>
+        <state line="20" column="0" selection-start="1956" selection-end="1956" vertical-scroll-proportion="0.4623218" />
       </provider>
     </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.6.0_38/src.zip!/java/lang/ClassLoader.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="993" column="15" selection-start="36749" selection-end="36749" vertical-scroll-proportion="0.34343433">
-          <folding />
-        </state>
+        <state line="993" column="15" selection-start="36749" selection-end="36749" vertical-scroll-proportion="0.34343433" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="38" selection-start="342" selection-end="367" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="2" selection-start="753" selection-end="753" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#32#74#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramString.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="24" selection-start="444" selection-end="444" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="8" column="38" selection-start="342" selection-end="367" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramGeohash.scala">
@@ -901,25 +822,60 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/GDELTTEst.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="0" selection-start="385" selection-end="428" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramString.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="21" selection-start="99" selection-end="505" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramStringTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="8" column="6" selection-start="0" selection-end="281" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/SegmentLike.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="13" column="6" selection-start="437" selection-end="437" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGramDateTime.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="33" selection-start="283" selection-end="283" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGram.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="111" column="34" selection-start="4923" selection-end="4923" vertical-scroll-proportion="0.0">
+        <state line="253" column="15" selection-start="10647" selection-end="10654" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/GDELTTEst.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/SegmentSentence.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="148" column="27" selection-start="5137" selection-end="5137" vertical-scroll-proportion="0.6010101">
+        <state line="11" column="19" selection-start="467" selection-end="467" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/SegmentSentenceTest.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="87" column="14" selection-start="2544" selection-end="2544" vertical-scroll-proportion="0.58464223">
           <folding>
-            <element signature="e#32#68#0" expanded="true" />
+            <element signature="e#32#59#0" expanded="true" />
           </folding>
         </state>
       </provider>

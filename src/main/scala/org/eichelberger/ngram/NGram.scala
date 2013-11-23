@@ -19,6 +19,9 @@ object NGram {
     }
 
     partsWindows.foldLeft(NGram[T,U](windowSize))((ngSoFar, window) => {
+      if (window.size < windowSize && window.last != ev.EndPart)
+        throw new Exception(s"Short sequence does not end with EndPart:  ${window.map(_.toString).mkString("<", ">, <", ">")}")
+
       val partsReverse: List[U] = window.reverse
       val ngWindow = partsReverse.tail.foldLeft(NGram[T,U](partsReverse.head, windowSize))((ngSoFar, part) =>
         NGram[T,U](part, windowSize) + ngSoFar
@@ -133,11 +136,30 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
       parentSoFar =>
         if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
         else None
-    )).getOrElse(throw new Exception("Could not find suitable parent for sampling"))
+    )).getOrElse({
+      //println(s"Parts so far:  ${partsSoFar.map(_.toString).mkString(", ")}")
+      //println(s"Last parts so far:  ${lastParts.map(_.toString).mkString(", ")}")
+      lastParts.foldLeft(Option(this))((parentOptSoFar, part) => parentOptSoFar.flatMap(
+        parentSoFar => {
+          //print(s"[PART] <$part> -> ")
+          if (parentSoFar.children.contains(part)) {
+            //println("found")
+            parentSoFar.children.get(part)
+          }
+          else {
+            //println("MISSING!")
+            None
+          }}
+      ))
+      throw new Exception("Could not find suitable parent for sampling")
+    })
   }
 
   //@TODO confirm that this works when the n-gram has fewer than window-size plys
   private def nextSamplePart(partsSoFar: List[U]): List[U] = {
+    //@TODO debug
+    //println(s"[BUILDING RANDOM] partsSoFar = ${partsSoFar.map(_.toString).mkString("<", ">, <", ">")}")
+
     // identify the bottom-most parent
     val parent = getLastNode(partsSoFar)
 //    // for identifying the parent, you only need the last few elements
@@ -158,6 +180,14 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
 //        if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
 //        else None
 //    )).getOrElse(throw new Exception("Could not find suitable parent for sampling"))
+
+    //@TODO debug
+    //println(s"  Children:  ${parent.children.map(_._1.toString).mkString("|")}")
+
+    if (parent.children.size < 1) {
+      throw new Exception("Parent unexpectedly contains no children:  ")
+      parent.prettyPrint()
+    }
 
     // generate a next value
     val nextValue = Option(parent.sampleValue.getOrElse(parent.value))
@@ -202,5 +232,36 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     }
 
     terminals.map(terminal => getTerminalProbability(terminal)).product
+  }
+
+  def countValues(target: U): Long = {
+    val initial: Long = if (value == target) count else 0L
+
+    children.foldLeft(initial)((soFar, child) => soFar + child._2.countValues(target))
+  }
+
+  def validate {
+    if (value != ev.emptyPart)
+      throw new Exception(s"Root node should be empty; instead was:  <$value>}")
+
+    val numStart = countValues(ev.StartPart)
+    val numEnd = countValues(ev.EndPart)
+    if (numStart != numEnd)
+      throw new Exception(s"Mis-matching start, end counts:  $numStart != $numEnd")
+
+    def ensureLength(node: NGram[T, U], remainingDepth: Int) {
+      //node.prettyPrint()
+      //println(s"[ensureLength $remainingDepth] value $value")
+
+      if (remainingDepth < 0)
+        throw new Exception(s"Underflow in remainingDepth $remainingDepth")
+      if (remainingDepth == 0 && node.children.size > 0)
+        throw new Exception(s"Maximum depth exceeded; children = ${node.children.map(_._1.toString).mkString("|")}")
+      if (node.children.size < 1 && remainingDepth > 0 && node.value != ev.EndPart)
+        throw new Exception(s"Premature termination:  Ends in non-terminal <$node.value> with $remainingDepth layers still expected")
+      if (node.children.size > 0)
+        node.children.map(child => ensureLength(child._2, remainingDepth - 1))
+    }
+    children.map(child => ensureLength(child._2, windowSize - 1))
   }
 }
