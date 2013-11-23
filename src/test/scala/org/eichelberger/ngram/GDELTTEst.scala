@@ -7,6 +7,7 @@ import org.specs2.mutable._
 import org.specs2.runner.JUnitRunner
 import java.io.BufferedInputStream
 import scala.io.Source
+import org.joda.time.format.DateTimeFormat
 
 @RunWith(classOf[JUnitRunner])
 class GDELTTest extends Specification {
@@ -55,7 +56,6 @@ class GDELTTest extends Specification {
     def encode(gh: GeoHash, dt: DateTime): String = {
       val ghs = gh.hash
       val dts = obj_NG_DT.dt2s(dt)
-      println(s"[ENC] ghs=$ghs, dts=$dts")
       ghs.take(row.gh) + dts.take(row.dt) +
         ghs.drop(row.gh).take(colf.gh) + dts.drop(row.dt).take(colf.dt) +
         ghs.drop(row.gh + colf.gh).take(colq.gh) + dts.drop(row.dt + colf.dt).take(colq.dt)
@@ -67,7 +67,6 @@ class GDELTTest extends Specification {
       val dts = enc.drop(row.gh).take(row.dt) +
         enc.drop(row.size + colf.gh).take(colf.dt) +
         enc.drop(row.size + colf.size + colq.gh).take(colq.dt)
-      println(s"ghs=$ghs, dts=$dts")
       (GeoHash(ghs, 35), obj_NG_DT.s2dt(dts))
     }
   }
@@ -102,6 +101,90 @@ class GDELTTest extends Specification {
 
       val encOut = ngram.sample
       encOut must be equalTo enc
+    }
+  }
+
+  def fields2gh(fields: Array[String], precision: Int = 35): GeoHash = {
+    val x = fields(54)
+    val y = fields(53)
+    GeoHash(x.toDouble, y.toDouble, precision)
+  }
+
+  val gdeltDTF = DateTimeFormat.forPattern("yyyyMMdd")
+  def fields2dt(fields: Array[String]): DateTime = {
+    val dts = fields(1)
+    gdeltDTF.parseDateTime(dts)
+  }
+
+  case class Entry(gh: GeoHash, dt: DateTime)
+
+  object Entry {
+    def fromFields(fields: Array[String]): Entry = Entry(fields2gh(fields), fields2dt(fields))
+  }
+
+
+
+  def recommendSchema(ngGH: NGram[GeoHash, String], ngDT: NGram[String, String], threshold: Double = 0.05): Schema = {
+    val ghScores = (5 to 35 by 5).map(ghb => ngGH.getMostFrequent(ghb))
+    val dtScores = (1 to 17).map(dtb => ngDT.getMostFrequent(dtb))
+
+    println(s"ghScores:  ${ghScores.map(_.toString).mkString(", ")}")
+    println(s"dtScores:  ${dtScores.map(_.toString).mkString(", ")}")
+
+    val scores: List[(GeoHash, String, Double, Int, Int)] = (for (
+      ghb <- 1 to 7;
+      dtb <- 1 to 17;
+      ghScore = ghScores(ghb - 1);
+      dtScore = dtScores(dtb - 1);
+      scored = (ghScore._1, dtScore._1, ghScore._2 * dtScore._2, ghb, dtb)
+    ) yield scored).sortWith((a,b) => a._3 < b._3).toList
+
+    val qualifiers = scores.filter(_._3 <= threshold)
+
+    qualifiers.takeRight(10).foreach(s => {
+      val ghs = s._1.hash
+      val dt = s._2
+      val score = s._3.formatted("%1.4f")
+
+      println(s"[QUALIFYING] $score = ($ghs, $dt)")
+    })
+
+    val best = qualifiers.last
+    val ghb: Int = best._4
+    val dtb: Int = best._5
+
+    //@TODO code
+    val row = BitsSpecification(ghb, dtb)
+    val colf = BitsSpecification(math.min(2, 7 - ghb), 0)
+    val colq = BitsSpecification(math.max(0, 7 - row.gh - colf.gh), math.max(0, 17 - row.dt - colf.dt))
+    Schema(row, colf, colq)
+  }
+
+  "independent n-grams" should {
+    "recommend index-schema" in {
+      val windowSize = 6
+      val engGH = NGram[GeoHash, String](windowSize)
+      val engDT = NGram[String, String](windowSize)
+
+      val pair = GDELT(0, 0).foldLeft((engGH, engDT))((t, fields) => t match { case (ngGHSoFar, ngDTSoFar) =>
+        val entry = Entry.fromFields(fields)
+        (
+          ngGHSoFar + entry.gh,
+          ngDTSoFar + obj_NG_DT.dt2s(entry.dt)
+        )
+      })
+
+      val (ngGH, ngDT) = pair
+
+      //ngDT.prettyPrint()
+
+      val schema = recommendSchema(ngGH, ngDT, 0.01)
+      println(s"Schema:  $schema")
+
+      schema must be equalTo Schema(BitsSpecification(2, 6), BitsSpecification(2, 0), BitsSpecification(3, 11))
+
+      //@TODO replace
+      1 must be equalTo 1
     }
   }
 }

@@ -61,6 +61,8 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     })
   }
 
+  def +(whole: T): NGram[T, U] = this + NGram.fromWhole[T, U](whole, this.windowSize)
+
   def +(that: NGram[T, U]): NGram[T, U] =
     if (that.value == ev.emptyPart) {
       that.children.foldLeft(this)((ngSoFar, childKV) => ngSoFar.blend(childKV._2))
@@ -95,28 +97,67 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
         .map(cs => children(cs.value))
     } else None
 
+  def getMostFrequent(maxDepth: Int = 3): (T, Double) = {
+    def _getMostFrequent(partsSoFar: List[U], depthRemaining: Int): (List[U], Double) = {
+      depthRemaining match {
+        case n if n <= 0 => (partsSoFar, estimateProbability(partsSoFar))
+        case _ =>
+          val parent = getLastNode(partsSoFar)
+          val maxCount = parent.children.map(c => c._2.count).max
+          val maximalChildren = parent.children.toList.filter(_._2.count == maxCount)
+          val childScores: List[(List[U], Double)] = maximalChildren.map(child =>
+            _getMostFrequent(partsSoFar ++ List(child._1), depthRemaining - 1)
+          )
+          childScores.sortWith((a,b) => a._2 < b._2).last
+      }
+    }
+
+    val best  = _getMostFrequent(List(ev.StartPart), maxDepth)
+    val parts: List[U] = best._1 ++ (best._1.last match {
+      case ev.EndPart => Nil
+      case _          => List(ev.EndPart)
+    })
+    val score: Double = best._2
+
+    (ev.compose(parts.iterator), score)
+  }
+
   def sampleValue: Option[U] = randomChild.map(_.value)
 
-  //@TODO confirm that this works when the n-gram has fewer than window-size plys
-  private def nextSamplePart(partsSoFar: List[U]): List[U] = {
-    // for identifying the parent, you only need the last few elements
+  def getLastNode(partsSoFar: List[U]): NGram[T, U] = {
     val lastParts: List[U] =
       if (windowSize == NoWindowSize) partsSoFar
       else partsSoFar.takeRight(windowSize - 1)
 
     lastParts.foldLeft(Option(this))((parentOptSoFar, part) => parentOptSoFar.flatMap(
-      parentSoFar => {
-        val result = if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
-        else None
-        result
-      }
-    )).getOrElse(throw new Exception("Could not find suitable parent for sampling"))
-
-    val parent = lastParts.foldLeft(Option(this))((parentOptSoFar, part) => parentOptSoFar.flatMap(
       parentSoFar =>
         if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
         else None
     )).getOrElse(throw new Exception("Could not find suitable parent for sampling"))
+  }
+
+  //@TODO confirm that this works when the n-gram has fewer than window-size plys
+  private def nextSamplePart(partsSoFar: List[U]): List[U] = {
+    // identify the bottom-most parent
+    val parent = getLastNode(partsSoFar)
+//    // for identifying the parent, you only need the last few elements
+//    val lastParts: List[U] =
+//      if (windowSize == NoWindowSize) partsSoFar
+//      else partsSoFar.takeRight(windowSize - 1)
+//
+////    lastParts.foldLeft(Option(this))((parentOptSoFar, part) => parentOptSoFar.flatMap(
+////      parentSoFar => {
+////        val result = if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
+////        else None
+////        result
+////      }
+////    )).getOrElse(throw new Exception("Could not find suitable parent for sampling"))
+//
+//    val parent = lastParts.foldLeft(Option(this))((parentOptSoFar, part) => parentOptSoFar.flatMap(
+//      parentSoFar =>
+//        if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
+//        else None
+//    )).getOrElse(throw new Exception("Could not find suitable parent for sampling"))
 
     // generate a next value
     val nextValue = Option(parent.sampleValue.getOrElse(parent.value))
