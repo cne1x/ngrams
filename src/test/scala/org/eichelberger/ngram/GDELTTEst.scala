@@ -186,15 +186,10 @@ class GDELTTest extends Specification {
 
       val (ngGH, ngDT) = pair
 
-      //ngDT.prettyPrint()
-
       val schema = recommendSchema(ngGH, ngDT, 0.01)
       println(s"Schema:  $schema")
 
       schema must be equalTo Schema(BitsSpecification(5,6),BitsSpecification(2,0),BitsSpecification(0,11))
-
-      //@TODO replace
-      1 must be equalTo 1
     }
   }
 }

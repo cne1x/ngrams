@@ -5,7 +5,16 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import scala.io.Source
 
-
+/*
+ * Texts used in these tests have been extracted from the Project Gutenberg versions.
+ * There are two reasons why entire files have not been used:
+ * 1.  In some cases, the texts were too long for unit tests;
+ * 2.  The preamble and codas were unsuitable for word-frequency tests.
+ *
+ * These sub-texts are not meant to misrepresent any intellectual property.
+ * Please see http://www.gutenberg.org/wiki/Gutenberg:Terms_of_Use
+ * and be thankful that such a resource exists for freely available texts.
+ */
 @RunWith(classOf[JUnitRunner])
 class SegmentSentenceTest extends Specification {
   implicit val obj = SegmentSentence

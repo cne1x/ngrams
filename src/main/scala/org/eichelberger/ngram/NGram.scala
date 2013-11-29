@@ -103,94 +103,6 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
         .map(cs => children(cs.value))
     } else None
 
-  /*
-
-   APPROACH:
-
-   Keep a list of ALL partials and their frequencies, but
-   1.  keep it sorted
-   2.  each time you add a new item, delete all records that both
-       A.  have a shorter length; AND
-       B.  have a lower frequency
-
-   */
-
-//  def getMostFrequent(maxDepth: Int = 3): (List[U], Double) = {
-//    case class PQEntry(partial: List[U], frequency: Double)
-//
-//    def updatePQ(pq: List[PQEntry], entry: PQEntry): List[PQEntry] = {
-//      // there must not exist any full-size entry whose frequency is at least as good
-//      def isAcceptable =
-//        !pq.exists(e => e.partial.size == maxDepth && e.frequency >= entry.frequency) &&
-//        !(entry.frequency == 0.0 && pq.exists(e => e.partial.size >= entry.partial.size && e.frequency == 0.0))
-//
-//      // if this is a full-size entry, but there are better full-size entries already present, don't add it
-//      if (isAcceptable) {
-//        // if this entry is full-size, remove other (known worse) full-size entries
-//        val r1 =
-//          if (entry.partial.size == maxDepth) pq.filter(_.partial.size < maxDepth)
-//          else pq
-//
-//        // if there is more than one entry whose frequency is zero, keep only the longest (known to be this)
-//        val r2 =
-//          if (entry.frequency == 0.0) r1.filter(_.frequency > 0.0)
-//          else r1
-//
-//        //@TODO replace
-//        entry :: r2
-//      } else pq  // unchanged, because the candidate was not acceptable
-//    }
-//
-////    def getCandidate(pq: List[PQEntry]): Option[PQEntry] = {
-////      val unterminated = pq.filter(_.partial.last != ev.EndPart)
-////      val minLength = unterminated.map(_.partial.size).min
-////      if (minLength == maxDepth) None
-////      else unterminated.find(_.partial.size == minLength)
-////    }
-////
-////    def extend(pq: List[PQEntry]): List[PQEntry] = {
-////      getCandidate(pq) match {
-////        case Some(nextCandidate) =>
-////          // find the parent node associated with this sequence of partials
-////          val parent = getLastNode(nextCandidate.partial)
-////
-////          // add all of this candidate's children to the priority queue
-////          val entries = parent.children.toList.map(child => new PQEntry(
-////            nextCandidate.partial ++ List(child._1),
-////            nextCandidate.frequency * parent.count.toDouble / child._2.count.toDouble
-////          ))
-////          val nextPQ: List[PQEntry] = (entries /: pq) {
-////            case (pqSoFar, entry) => updatePQ(pqSoFar, entry)
-////          }
-////
-////          extend(nextPQ)
-////        case _ => pq  // do nothing; you're done
-////      }
-////    }
-//
-//    def recurse(pq: List[PQEntry], parts: List[U]): List[PQEntry] = {
-//      if (parts.last != ev.EndPart && parts.size < maxDepth) {
-//        val parent = getLastNode(parts);
-//        (parent.children.toList /: pq) {
-//          case (pqSoFar, childKV) =>
-//            val a = pqSoFar
-//            val b = childKV
-//            val nextParts = parts ++ List(childKV._1)
-//            val entry = PQEntry(
-//              nextParts,
-//              estimateProbability(nextParts)
-//            )
-//            updatePQ(pqSoFar, entry)
-//        }
-//      } else pq
-//    }
-//
-//    //val pq: List[PQEntry] = extend(List[PQEntry](new PQEntry(List(ev.StartPart), 1.0)))
-//    val pq: List[PQEntry] = recurse(List[PQEntry](), List(ev.StartPart))
-//    val best = pq.head
-//    (best.partial, best.frequency)
-//  }
-
   def getMostFrequent(maxDepth: Int = 3): (List[U], Double) = {
     case class Entry(partial: List[U], frequency: Double) {
       def extend(part: U): Entry = {
@@ -272,9 +184,6 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     // simple validation
     if (parts.head != ev.StartPart)
       throw new Exception(s"Invalid most-frequent sequence; does not begin with start-token:  ${parts.map(_.toString).mkString(", ")}")
-
-    //@TODO cne1x debug
-    println(s"[MOST FREQUENT] parts ($maxDepth) = ${parts.map(_.toString).mkString("{", ", ", "}")}; frequency $frequency")
 
     (parts, frequency)
   }
