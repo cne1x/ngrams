@@ -32,6 +32,9 @@ object NGram {
 }
 
 import NGram._
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
 
 case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], windowSize: Int)(implicit ev: SegmentLike[T, U]) {
   require(windowSize == NoWindowSize || windowSize > 1)
@@ -100,33 +103,189 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
         .map(cs => children(cs.value))
     } else None
 
-  def getMostFrequent(maxDepth: Int = 3): (T, Double) = {
-    def _getMostFrequent(partsSoFar: List[U], depthRemaining: Int): (List[U], Double) = {
-      depthRemaining match {
-        case n if n <= 0 => (partsSoFar, estimateProbability(partsSoFar))
-        case _ =>
-          val parent = getLastNode(partsSoFar)
-          val maxCount = parent.children.map(c => c._2.count).max
-          val maximalChildren = parent.children.toList.filter(_._2.count == maxCount)
-          val childScores: List[(List[U], Double)] = maximalChildren.map(child =>
-            _getMostFrequent(partsSoFar ++ List(child._1), depthRemaining - 1)
-          )
-          childScores.sortWith((a,b) => a._2 < b._2).last
+  /*
+
+   APPROACH:
+
+   Keep a list of ALL partials and their frequencies, but
+   1.  keep it sorted
+   2.  each time you add a new item, delete all records that both
+       A.  have a shorter length; AND
+       B.  have a lower frequency
+
+   */
+
+//  def getMostFrequent(maxDepth: Int = 3): (List[U], Double) = {
+//    case class PQEntry(partial: List[U], frequency: Double)
+//
+//    def updatePQ(pq: List[PQEntry], entry: PQEntry): List[PQEntry] = {
+//      // there must not exist any full-size entry whose frequency is at least as good
+//      def isAcceptable =
+//        !pq.exists(e => e.partial.size == maxDepth && e.frequency >= entry.frequency) &&
+//        !(entry.frequency == 0.0 && pq.exists(e => e.partial.size >= entry.partial.size && e.frequency == 0.0))
+//
+//      // if this is a full-size entry, but there are better full-size entries already present, don't add it
+//      if (isAcceptable) {
+//        // if this entry is full-size, remove other (known worse) full-size entries
+//        val r1 =
+//          if (entry.partial.size == maxDepth) pq.filter(_.partial.size < maxDepth)
+//          else pq
+//
+//        // if there is more than one entry whose frequency is zero, keep only the longest (known to be this)
+//        val r2 =
+//          if (entry.frequency == 0.0) r1.filter(_.frequency > 0.0)
+//          else r1
+//
+//        //@TODO replace
+//        entry :: r2
+//      } else pq  // unchanged, because the candidate was not acceptable
+//    }
+//
+////    def getCandidate(pq: List[PQEntry]): Option[PQEntry] = {
+////      val unterminated = pq.filter(_.partial.last != ev.EndPart)
+////      val minLength = unterminated.map(_.partial.size).min
+////      if (minLength == maxDepth) None
+////      else unterminated.find(_.partial.size == minLength)
+////    }
+////
+////    def extend(pq: List[PQEntry]): List[PQEntry] = {
+////      getCandidate(pq) match {
+////        case Some(nextCandidate) =>
+////          // find the parent node associated with this sequence of partials
+////          val parent = getLastNode(nextCandidate.partial)
+////
+////          // add all of this candidate's children to the priority queue
+////          val entries = parent.children.toList.map(child => new PQEntry(
+////            nextCandidate.partial ++ List(child._1),
+////            nextCandidate.frequency * parent.count.toDouble / child._2.count.toDouble
+////          ))
+////          val nextPQ: List[PQEntry] = (entries /: pq) {
+////            case (pqSoFar, entry) => updatePQ(pqSoFar, entry)
+////          }
+////
+////          extend(nextPQ)
+////        case _ => pq  // do nothing; you're done
+////      }
+////    }
+//
+//    def recurse(pq: List[PQEntry], parts: List[U]): List[PQEntry] = {
+//      if (parts.last != ev.EndPart && parts.size < maxDepth) {
+//        val parent = getLastNode(parts);
+//        (parent.children.toList /: pq) {
+//          case (pqSoFar, childKV) =>
+//            val a = pqSoFar
+//            val b = childKV
+//            val nextParts = parts ++ List(childKV._1)
+//            val entry = PQEntry(
+//              nextParts,
+//              estimateProbability(nextParts)
+//            )
+//            updatePQ(pqSoFar, entry)
+//        }
+//      } else pq
+//    }
+//
+//    //val pq: List[PQEntry] = extend(List[PQEntry](new PQEntry(List(ev.StartPart), 1.0)))
+//    val pq: List[PQEntry] = recurse(List[PQEntry](), List(ev.StartPart))
+//    val best = pq.head
+//    (best.partial, best.frequency)
+//  }
+
+  def getMostFrequent(maxDepth: Int = 3): (List[U], Double) = {
+    case class Entry(partial: List[U], frequency: Double) {
+      def extend(part: U): Entry = {
+        val newPartial = partial ++ List(part)
+        val newFrequency = estimateProbability(newPartial)
+        Entry(newPartial, newFrequency)
       }
     }
 
-    val best  = _getMostFrequent(List(ev.StartPart), maxDepth)
-    val parts: List[U] = best._1 ++ (best._1.last match {
-      case ev.EndPart => Nil
-      case _          => List(ev.EndPart)
-    })
-    val score: Double = best._2
+    def recurse(current: Entry, bestSoFar: Option[Entry]): Option[Entry] = {
+      if (current.partial.size <= maxDepth) {
+        // you can still recurse
+        if (current.partial.last != ev.EndPart) {
+          // you have not yet terminated, and there are levels of recursion left to use
+          if (bestSoFar.isEmpty || current.frequency > bestSoFar.get.frequency) {
+            // there's still room for improvement down this chain
+            val parent = getLastNode(current.partial)
+            parent.children.toList.foldLeft(bestSoFar)((soFar, child) => {
+              val childParts = current.partial ++ List(child._1)
+              val childFreq = current.frequency * child._2.count.toDouble / parent.count.toDouble
+              recurse(Entry(childParts, childFreq), soFar)
+            })
+          } else bestSoFar
+        } else bestSoFar  // you've hit an end-of-sequence token early
+      } else {
+        // already bottomed out; return the best encountered so far
+        bestSoFar.map(soFar => if (soFar.frequency > current.frequency) soFar else current).orElse(Option(current))
+      }
+    }
 
-    (ev.compose(parts.iterator), score)
+    recurse(Entry(List(ev.StartPart), 1.0), None) match {
+      case Some(entry) => (entry.partial, entry.frequency)
+      case None        => (Nil, 0.0)
+    }
+  }
+
+
+  def old_getMostFrequent(maxDepth: Int = 3): (List[U], Double) = {
+    def getMostFrequentParts(partsSoFar: List[U], parentCount: Long, depthRemaining: Int): (List[U], Double) = {
+      // identify the parent node with maximal context
+      val nodeTry = Try { getLastNode(partsSoFar.takeRight(windowSize - 1)) }
+
+      // if you couldn't find a parent node, be sure you have a good reason
+      // (such as:  the sequence was already ended)
+      val node: NGram[T, U] = nodeTry match {
+        case Success(someNode) => someNode
+        case Failure(_) =>
+          if (partsSoFar.last == ev.EndPart) null
+          else throw new Exception("Could not find parent for un-terminated parts list:  " +
+            partsSoFar.map(_.toString).mkString(", "))
+      }
+
+      val p = node match {
+        case null => 1.0 / parentCount.toDouble  // @TODO refine this speculative return-value!
+        case _ => node.count.toDouble / parentCount.toDouble
+      }
+
+      // the action to take depends upon how much depth remains
+      depthRemaining match {
+        case n if n <= 0 =>
+          // you've bottomed out
+          (partsSoFar, p)
+        case _ if node == null || node.children.size < 1 =>
+          // you've not bottomed out, but you have no children
+          (partsSoFar, p)
+        case _ =>
+          // there's some depth left, and you have at least one child
+          val recursives: Seq[(List[U], Double)] = node.children.toList.map(child =>
+            getMostFrequentParts(partsSoFar ++ List(child._1), node.count, depthRemaining - 1))
+          // use only the highest-frequency expectation among all of your child values
+          val (parts, frequency) = recursives.sortWith((a, b) => a._2 < b._2).last
+          (parts, p * frequency)
+      }
+    }
+
+    // you must start with a beginning-of-sequence token (which does not accumulate against the count)
+    val (parts, frequency) = getMostFrequentParts(List(ev.StartPart), count, maxDepth)
+
+    // simple validation
+    if (parts.head != ev.StartPart)
+      throw new Exception(s"Invalid most-frequent sequence; does not begin with start-token:  ${parts.map(_.toString).mkString(", ")}")
+
+    //@TODO cne1x debug
+    println(s"[MOST FREQUENT] parts ($maxDepth) = ${parts.map(_.toString).mkString("{", ", ", "}")}; frequency $frequency")
+
+    (parts, frequency)
   }
 
   def sampleValue: Option[U] = randomChild.map(_.value)
 
+  // special case:
+  // if the parts-so-far already end in an end-of-sequence marker,
+  // and there are fewer than window-size parts in the list,
+  // then you're not guaranteed to find any good matching node (because
+  // there may have been no such windowed sequence ever added)
   def getLastNode(partsSoFar: List[U]): NGram[T, U] = {
     val lastParts: List[U] =
       if (windowSize == NoWindowSize) partsSoFar
@@ -137,19 +296,10 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
         if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
         else None
     )).getOrElse({
-      //println(s"Parts so far:  ${partsSoFar.map(_.toString).mkString(", ")}")
-      //println(s"Last parts so far:  ${lastParts.map(_.toString).mkString(", ")}")
       lastParts.foldLeft(Option(this))((parentOptSoFar, part) => parentOptSoFar.flatMap(
-        parentSoFar => {
-          //print(s"[PART] <$part> -> ")
-          if (parentSoFar.children.contains(part)) {
-            //println("found")
-            parentSoFar.children.get(part)
-          }
-          else {
-            //println("MISSING!")
-            None
-          }}
+        parentSoFar =>
+          if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
+          else None
       ))
       throw new Exception("Could not find suitable parent for sampling")
     })
@@ -157,46 +307,31 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
 
   //@TODO confirm that this works when the n-gram has fewer than window-size plys
   private def nextSamplePart(partsSoFar: List[U]): List[U] = {
-    //@TODO debug
-    //println(s"[BUILDING RANDOM] partsSoFar = ${partsSoFar.map(_.toString).mkString("<", ">, <", ">")}")
+    try {
+      // identify the bottom-most parent
+      val parent = getLastNode(partsSoFar)
 
-    // identify the bottom-most parent
-    val parent = getLastNode(partsSoFar)
-//    // for identifying the parent, you only need the last few elements
-//    val lastParts: List[U] =
-//      if (windowSize == NoWindowSize) partsSoFar
-//      else partsSoFar.takeRight(windowSize - 1)
-//
-////    lastParts.foldLeft(Option(this))((parentOptSoFar, part) => parentOptSoFar.flatMap(
-////      parentSoFar => {
-////        val result = if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
-////        else None
-////        result
-////      }
-////    )).getOrElse(throw new Exception("Could not find suitable parent for sampling"))
-//
-//    val parent = lastParts.foldLeft(Option(this))((parentOptSoFar, part) => parentOptSoFar.flatMap(
-//      parentSoFar =>
-//        if (parentSoFar.children.contains(part)) parentSoFar.children.get(part)
-//        else None
-//    )).getOrElse(throw new Exception("Could not find suitable parent for sampling"))
+      if (parent.children.size < 1) {
+        throw new Exception("Parent unexpectedly contains no children:  ")
+        parent.prettyPrint()
+      }
 
-    //@TODO debug
-    //println(s"  Children:  ${parent.children.map(_._1.toString).mkString("|")}")
+      // generate a next value
+      val nextValue = Option(parent.sampleValue.getOrElse(parent.value))
+      if (nextValue.isEmpty) throw new Exception("Could not generate sample value from parent")
 
-    if (parent.children.size < 1) {
-      throw new Exception("Parent unexpectedly contains no children:  ")
-      parent.prettyPrint()
+      // recurse, if you haven't hit an end-of-sequence token
+      val newParts: List[U] = partsSoFar ++ nextValue
+      if (nextValue.get == ev.EndPart) newParts
+      else nextSamplePart(newParts)
+    } catch {
+      // you were unable to find a parent-match for the sequence so far;
+      // this MAY not be a problem, if the partial sequence already has an end-of-sequence marker
+      case ex: Exception =>
+        if (partsSoFar.last == ev.EndPart) partsSoFar
+        else throw new Exception("Could not find suitable parent for terminal node of partial sequence:  " +
+          partsSoFar.map(_.toString).mkString(", "))
     }
-
-    // generate a next value
-    val nextValue = Option(parent.sampleValue.getOrElse(parent.value))
-    if (nextValue.isEmpty) throw new Exception("Could not generate sample value from parent")
-
-    // recurse, if you haven't hit an end-of-sequence token
-    val newParts: List[U] = partsSoFar ++ nextValue
-    if (nextValue.get == ev.EndPart) newParts
-    else nextSamplePart(newParts)
   }
 
   // generate one plausible whole from parts that are chosen via
@@ -250,9 +385,6 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
       throw new Exception(s"Mis-matching start, end counts:  $numStart != $numEnd")
 
     def ensureLength(node: NGram[T, U], remainingDepth: Int) {
-      //node.prettyPrint()
-      //println(s"[ensureLength $remainingDepth] value $value")
-
       if (remainingDepth < 0)
         throw new Exception(s"Underflow in remainingDepth $remainingDepth")
       if (remainingDepth == 0 && node.children.size > 0)

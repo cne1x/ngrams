@@ -53,7 +53,7 @@ class SegmentSentenceTest extends Specification {
   "Gutenberg extractor" should {
     "extract the _Cask of Amontillado_" in {
       val text = getLocalGutenbergText("CaskOfAmontillado")
-      text.length must be equalTo 13023
+      text.length must be equalTo 13025
     }
   }
 

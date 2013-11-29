@@ -19,11 +19,12 @@ class GDELTTest extends Specification {
   // self-closing wrapper for a GDELT subset
   def GDELT(sampleSize: Int = 100, dropSize: Int = 0) = new Iterable[Array[String]] {
     val reNumber = """^[+\-]?[0-9]+(\.[0-9]+)?"""
+    val reDate = """^[12][09]\d\d[01]\d[0123]\d$"""
     def iterator = new Iterator[Array[String]] {
       // open the file
       val resource = getClass.getClassLoader.getResource("gdelt-50K.tsv")
       val src = Source.fromURL(resource, "Unicode")
-      val lines = src.getLines.map(_.split("\t")).filter(_.size == 57).filter(f => f(53).matches(reNumber) && f(54).matches(reNumber))
+      val lines = src.getLines.map(_.split("\t")).filter(_.size == 57).filter(f => f(53).matches(reNumber) && f(54).matches(reNumber) && f(1).matches(reDate))
       val netLines = if (sampleSize > 0) lines.drop(dropSize).take(sampleSize) else lines.drop(dropSize)
       var isClosed: Boolean = false
       def hasNext: Boolean = {
@@ -125,15 +126,23 @@ class GDELTTest extends Specification {
 
 
   def recommendSchema(ngGH: NGram[GeoHash, String], ngDT: NGram[String, String], threshold: Double = 0.05): Schema = {
-    val ghScores = (5 to 35 by 5).map(ghb => ngGH.getMostFrequent(ghb))
-    val dtScores = (1 to 17).map(dtb => ngDT.getMostFrequent(dtb))
+    val ghScores = (5 to 35 by 5).map(ghb => {
+      val r = ngGH.getMostFrequent(ghb)
+      println(s"  GH $ghb at ${new DateTime()} = $r")
+      r
+    })
+    val dtScores = (1 to 17).map(dtb => {
+      val r = ngDT.getMostFrequent(dtb)
+      println(s"  DT $dtb at ${new DateTime()} = $r")
+      r
+    })
 
     println(s"ghScores:  ${ghScores.map(_.toString).mkString(", ")}")
     println(s"dtScores:  ${dtScores.map(_.toString).mkString(", ")}")
 
-    val scores: List[(GeoHash, String, Double, Int, Int)] = (for (
-      ghb <- 1 to 7;
-      dtb <- 1 to 17;
+    val scores: List[(List[String], List[String], Double, Int, Int)] = (for (
+      ghb <- 1 to ghScores.size;
+      dtb <- 1 to dtScores.size;
       ghScore = ghScores(ghb - 1);
       dtScore = dtScores(dtb - 1);
       scored = (ghScore._1, dtScore._1, ghScore._2 * dtScore._2, ghb, dtb)
@@ -142,7 +151,8 @@ class GDELTTest extends Specification {
     val qualifiers = scores.filter(_._3 <= threshold)
 
     qualifiers.takeRight(10).foreach(s => {
-      val ghs = s._1.hash
+      val binary: String = s._1.tail.mkString
+      val ghs = obj_NG_GH.binaryStringToGeohash(binary)
       val dt = s._2
       val score = s._3.formatted("%1.4f")
 
@@ -162,7 +172,7 @@ class GDELTTest extends Specification {
 
   "independent n-grams" should {
     "recommend index-schema" in {
-      val windowSize = 6
+      val windowSize = 10
       val engGH = NGram[GeoHash, String](windowSize)
       val engDT = NGram[String, String](windowSize)
 
@@ -181,7 +191,7 @@ class GDELTTest extends Specification {
       val schema = recommendSchema(ngGH, ngDT, 0.01)
       println(s"Schema:  $schema")
 
-      schema must be equalTo Schema(BitsSpecification(2, 6), BitsSpecification(2, 0), BitsSpecification(3, 11))
+      schema must be equalTo Schema(BitsSpecification(5,6),BitsSpecification(2,0),BitsSpecification(0,11))
 
       //@TODO replace
       1 must be equalTo 1
