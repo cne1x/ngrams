@@ -62,7 +62,7 @@ class SegmentSentenceTest extends Specification {
   "Gutenberg extractor" should {
     "extract the _Cask of Amontillado_" in {
       val text = getLocalGutenbergText("CaskOfAmontillado")
-      text.length must be equalTo 13025
+      text.length must be equalTo 13023
     }
   }
 
@@ -75,22 +75,17 @@ class SegmentSentenceTest extends Specification {
         ,"Frankenstein-Chapter2"
       )
 
-      val windowSize = 4
+      val windowSize = 3
       val emptyNGram = NGram[String,String](windowSize)
       val ngram = sources.foldLeft(emptyNGram)((ngOuter, source) => {
         val text = getLocalGutenbergText(source)
         val sentences = toSentences(text)
         sentences.foldLeft(ngOuter)((ngInner, sentence) => {
           val ng = ngInner + sentence
-          //println(s"[SENTENCE] <$sentence>")
           ng.validate
           ng
         })
       })
-
-      //ngram.getLastNode(List(obj.StartPart)).prettyPrint()
-
-      //ngram.prettyPrint()
 
       println(s"Ngram window size:  ${ngram.windowSize}")
 

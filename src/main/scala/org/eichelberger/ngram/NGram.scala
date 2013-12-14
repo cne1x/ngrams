@@ -6,10 +6,13 @@ object NGram {
   val NoWindowSize = 0
 
   def apply[T, U](windowSize: Int = NoWindowSize)(implicit ev: SegmentLike[T, U]): NGram[T, U] =
-    new NGram[T, U](ev.emptyPart, 0L, Map.empty[U, NGram[T,U]], windowSize)(ev)
+    new NGram[T, U](ev.emptyPart, 0L, Map.empty[U, NGram[T,U]], windowSize, 0)(ev)
 
   def apply[T, U](value: U, windowSize: Int = NoWindowSize)(implicit ev: SegmentLike[T, U]): NGram[T, U] =
-    new NGram[T, U](value, 1L, Map.empty[U, NGram[T,U]], windowSize)(ev)
+    new NGram[T, U](value, 1L, Map.empty[U, NGram[T,U]], windowSize, 1)(ev)
+
+  def apply[T, U](value: U, windowSize: Int, maxDepth: Int)(implicit ev: SegmentLike[T, U]): NGram[T, U] =
+    new NGram[T, U](value, 1L, Map.empty[U, NGram[T,U]], windowSize, maxDepth)(ev)
 
   def fromWhole[T, U](whole: T, windowSize: Int = NoWindowSize)(implicit ev: SegmentLike[T, U]): NGram[T, U] = {
     val parts: List[U] = ev.decompose(whole).toList
@@ -23,7 +26,7 @@ object NGram {
         throw new Exception(s"Short sequence does not end with EndPart:  ${window.map(_.toString).mkString("<", ">, <", ">")}")
 
       val partsReverse: List[U] = window.reverse
-      val ngWindow = partsReverse.tail.foldLeft(NGram[T,U](partsReverse.head, windowSize))((ngSoFar, part) =>
+      val ngWindow = partsReverse.tail.foldLeft(NGram[T,U](partsReverse.head, windowSize, parts.size))((ngSoFar, part) =>
         NGram[T,U](part, windowSize) + ngSoFar
       )
       ngSoFar + ngWindow
@@ -36,7 +39,7 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
-case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], windowSize: Int)(implicit ev: SegmentLike[T, U]) {
+case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], windowSize: Int, maxDepthPresented: Int)(implicit ev: SegmentLike[T, U]) {
   require(windowSize == NoWindowSize || windowSize > 1)
 
   lazy val childSum: Long = (children.map { _ match { case (k, v) => v.count }}).sum
@@ -44,7 +47,7 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
   case class CumulativeChildCount(value: U, cumulativeSum: Long)
 
   lazy val cumulativeChildCounts: List[CumulativeChildCount] =
-  // @TODO make this a bit friendlier?
+    // @TODO make this a bit friendlier?
     children.foldLeft((0L, List[CumulativeChildCount]()))((t, childKV) => {
       val cumulativeSum = t._1 + childKV._2.count
       val newChild = CumulativeChildCount(childKV._1, cumulativeSum)
@@ -86,12 +89,16 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
       else that.children.foldLeft(children(that.value))((childNGSoFar, childKV) => childNGSoFar.blend(childKV._2))
       val newChildren = children + (that.value -> newChild)
       val newCount = newChildren.mapValues(_.count).map(_._2).sum
-      this.copy(count = newCount, children = newChildren)
+      this.copy(
+        count = newCount, children = newChildren,
+        maxDepthPresented = Math.max(maxDepthPresented, that.maxDepthPresented))
     } else {
       // this is a non-peer node not matching any children; just add it
       val newChildren = children + (that.value -> that)
       val newCount = newChildren.mapValues(_.count).map(_._2).sum
-      this.copy(count = newCount, children = newChildren)
+      this.copy(
+        count = newCount, children = newChildren,
+        maxDepthPresented = Math.max(maxDepthPresented, that.maxDepthPresented))
     }
   }
 
@@ -305,4 +312,8 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     }
     children.map(child => ensureLength(child._2, windowSize - 1))
   }
+
+  // assumes that every presentation begins with a START token
+  // defined by the evidence parameter
+  def presentationCount: Long = countValues(ev.StartPart)
 }
