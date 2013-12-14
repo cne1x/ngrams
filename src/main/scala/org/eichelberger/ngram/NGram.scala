@@ -1,5 +1,105 @@
 package org.eichelberger.ngram
 
+/**
+ * An n-gram -- see http://en.wikipedia.org/wiki/N-gram -- is a tree structure that
+ * summarizes sequences by counting transitions between elements, with the maximum
+ * sub-sequence length -- the "n" in "n-gram" being set in advance.
+ *
+ * For example, words are sequences of letters (characters), so if we built an
+ * n-gram from a large sample of English words, we would expect that the letter
+ * "Q" would be, almost always, followed by the letter "U" (assuming a relatively
+ * low incidence of Cat words as in http://www.youtube.com/watch?v=v2u_DVkK1Rc).
+ *
+ * To encourage coherence, sequences are assumed to begin with a [START] token,
+ * and end with an [END] token, so storing the string "foo" would actually
+ * represent 5 tokens:  "[START]", "f", "o", "o", "[END]"; the window-size
+ * would be applied as many times as possible, so a window size of 3 would
+ * yield these sub-strings, each inserted into the n-gram tree:
+ * - [START]-f-o
+ * - f-o-o
+ * - o-o-[END]
+ *
+ * Example uses of an n-gram:
+ * - Generate the most likely next token from a sub-sequence:  Say you had
+ *   aggregated search-strings within an n-gram.  Given a partial search-
+ *   string of "n-gra", you could make a prediction (suggestion) that the
+ *   next letter will be "m", based on the history of earlier entries.
+ * - Generate probabilistic samples:  If you wanted to name a new drug, one
+ *   (simplistic) approach would be to build an n-gram of all of the other
+ *   drug brand names, and then generate a list of sequences from the n-gram
+ *   (filtering out those already corresponding with real names).
+ * - Estimate probability of a sequence:  Say you stored the ZIP codes of
+ *   all of your customers in an n-gram, then you could ask what fraction
+ *   of your customers had a ZIP code that began with "229" (giving you
+ *   a very rough, and probably non-contiguous geographic range).  In fact,
+ *   you could generate an (admittedly odd-looking) chloropleth map from
+ *   such an n-gram (and make it hierarchical, supporting drill-through).
+ *
+ * Note that n-grams are additive, meaning that they allow for distributed
+ * aggregation:  If your data were partitioned into 10 separate units, each
+ * unit could be summarized in an n-gram, and then the n-grams could be
+ * combined directly without losing any (more) information, giving you a
+ * summary of the entire data set.  This might be interesting for NoSQL
+ * applications similar to the VACUUM/ANALYZE within PostgreSQL.
+ *
+ * The fidelity of the n-gram is related to its depth:  The shallower the n-gram,
+ * the less faithful will be its aggregation, but the less storage space will be
+ * required.  Depth in this n-gram is referred to as "windowSize".
+ *
+ * Another CRUCIAL impact of the n-gram depth is cycling:  Consider building an
+ * n-gram of words from this sentence:  "i am what i am"
+ * (punctuation and capitalization elided intentionally).  If the depth is 2,
+ * the windowed sub-sequences that will be presented to the n-gram are:
+ *
+ *   [START]-i
+ *   i-am
+ *   am-what
+ *   what-i
+ *   i-am
+ *   am-[END]
+ *
+ * yielding this n-gram:
+ *
+ *   [ROOT]
+ *   |
+ *   +-- [START]
+ *   |   |
+ *   |   +-- i
+ *   |       |
+ *   |       +-- am
+ *   |
+ *   +-- i (2)
+ *   |   |
+ *   |   +-- am (2)
+ *   |
+ *   +-- am (2)
+ *   |   |
+ *   |   +-- what
+ *   |   |
+ *   |   +-- [END]
+ *   |
+ *   +-- what
+ *       |
+ *       +-- i
+ *
+ * There is a possibility that drawing a sample from this n-gram will result in
+ * a sequence that does not terminate:  "[START]-i-am-what-i-am-what-i-am-..."
+ * The possible presence of this kind of cycle complicates sampling.
+ *
+ * The estimate of sequence probabilities is degraded by the number of sub-
+ * sequences shared among different presentations.  Consider storing two strings
+ * "Abbbbc" and "Dbbbbe" with a window size of 3; the shared cycle will lower
+ * the estimated probability of either real (observed) presentation.
+ *
+ * The reader deserves a more cogent description of n-grams, their uses, and
+ * limitations.  Perhaps some kind soul will someday provide one here...
+ * or at least reference a better discussion elsewhere...
+ *
+ * To implement n-grams, we have chosen a two-part approach:  This file represents
+ * the destination for data, the n-gram itself; the other part is the SegmentLike
+ * trait that defines the type of sequence data that can be stored in an n-gram.
+ */
+
 // an n-gram must be built on top of a type that is segmented
 
 object NGram {
@@ -35,11 +135,22 @@ object NGram {
 }
 
 import NGram._
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
+
+/**
+ * The n-gram is a recursive data structure, representing both a tree and a node.
+ *
+ * @param value the single segment associated with this node
+ * @param count how many instances
+ * @param children the association of next tokens with child nodes
+ * @param windowSize the maximum depth of any sub-sequence within the tree
+ * @param maxDepthPresented the maximum length of any single sequence anywhere in the tree
+ * @param ev the sequence-like evidence that knows how to handle the sequence
+ * @tparam T the sequence type (such as "word")
+ * @tparam U the sequence-element type (such as "letter within a word")
+ */
 
 case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], windowSize: Int, maxDepthPresented: Int)(implicit ev: SegmentLike[T, U]) {
+  // a window-size of 1 is degenerate
   require(windowSize == NoWindowSize || windowSize > 1)
 
   lazy val childSum: Long = (children.map { _ match { case (k, v) => v.count }}).sum
@@ -56,9 +167,11 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
 
   lazy val nodeCount: Int = 1 + children.map { case (k,v) => v.nodeCount }.toList.sum
 
+  // this is intended for display, not for serialization
   override def toString: String =
     s"'${ev.partToString(value)}':$windowSize:$count=${children.map(kv => kv._2.toString).mkString("<", ", ", ">")}"
 
+  // yields a tree-like structure suitable for console display
   def prettyPrint(level: Int = 0, ongoing: Map[Int,Boolean] = Map.empty[Int,Boolean]) {
     val leader = (0 until level).map(i => if (ongoing.contains(i)) "|  " else "   ").mkString
     println(s"$leader+- '${ev.partToString(value)}' ($count)")
@@ -70,8 +183,10 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     })
   }
 
+  // yields the result of adding a new sequence to this n-gram
   def +(whole: T): NGram[T, U] = this + NGram.fromWhole[T, U](whole, this.windowSize)
 
+  // yields the result of adding another n-gram to this one
   def +(that: NGram[T, U]): NGram[T, U] =
     if (that.value == ev.emptyPart) {
       that.children.foldLeft(this)((ngSoFar, childKV) => ngSoFar.blend(childKV._2))
@@ -102,6 +217,7 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     }
   }
 
+  // probabilistically selects a child based on counts via roulette-wheel selection
   private def randomChild: Option[NGram[T, U]] =
     if (children.size > 0) {
       // roulette-wheel selection
@@ -110,7 +226,53 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
         .map(cs => children(cs.value))
     } else None
 
-  def getMostFrequent(maxDepth: Int = 3): (List[U], Double) = {
+  /**
+   * There are applications, such as index planning, in which it can be useful to
+   * know how concentrated the n-gram aggregate is.  In some cases, it is useful
+   * to think of the highest expected probability for a single sequence (sample),
+   * which is what this function estimates.
+   *
+   * It will only be an estimate, because there is no guarantee that the n-gram's
+   * aggregate is deterministic (because of recurrent sub-sections within the
+   * presentation sequences).
+   *
+   * Furthermore, a greedy approach is inappropriate, because the frequencies are
+   * driven by the transition among elements.  Imagine the following n-gram:
+   *
+   *   [ROOT]
+   *   |
+   *   +-- [START]
+   *   |   |
+   *   |   +-- A (5)
+   *   |   |   |
+   *   |   |   +-- B (5)
+   *   |   |
+   *   |   +-- B (7)
+   *   |       |
+   *   |       +-- C (4)
+   *   |       |
+   *   |       +-- D (3)
+   *   |
+   *   +-- [ so on and so forth... ]
+   *
+   * In the preceding example, the greedy approach would claim that "[START]-B" is
+   * the most-frequent choice, where clearly "[START]-A" is better, because A's
+   * single child concentrates the frequency better (not knowing more about the
+   * subsequent, deeper parts of the n-gram tree).  (NB:  If the maximum sample
+   * depth were set to 2, then "[START]-B" would, in fact, be the highest-
+   * frequency answer.)
+   *
+   * To accommodate this vagary, we conduct a more thorough exploration of the
+   * n-gram tree for the highest-frequency sequences, pruning out choices as
+   * quickly as possible.
+   *
+   * @param maxDepth how many levels deep you are allowed to search; defaults to the
+   *                 maximum length of any presentation seen so far
+   * @return a sample of fixed length for which no other sample has a higher
+   *         expected frequency-of-occurrence
+   */
+
+  def getMostFrequent(maxDepth: Int = maxDepthPresented): (List[U], Double) = {
     case class Entry(partial: List[U], frequency: Double) {
       def extend(part: U): Entry = {
         val newPartial = partial ++ List(part)
@@ -146,56 +308,10 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     }
   }
 
-
-  def old_getMostFrequent(maxDepth: Int = 3): (List[U], Double) = {
-    def getMostFrequentParts(partsSoFar: List[U], parentCount: Long, depthRemaining: Int): (List[U], Double) = {
-      // identify the parent node with maximal context
-      val nodeTry = Try { getLastNode(partsSoFar.takeRight(windowSize - 1)) }
-
-      // if you couldn't find a parent node, be sure you have a good reason
-      // (such as:  the sequence was already ended)
-      val node: NGram[T, U] = nodeTry match {
-        case Success(someNode) => someNode
-        case Failure(_) =>
-          if (partsSoFar.last == ev.EndPart) null
-          else throw new Exception("Could not find parent for un-terminated parts list:  " +
-            partsSoFar.map(_.toString).mkString(", "))
-      }
-
-      val p = node match {
-        case null => 1.0 / parentCount.toDouble  // @TODO refine this speculative return-value!
-        case _ => node.count.toDouble / parentCount.toDouble
-      }
-
-      // the action to take depends upon how much depth remains
-      depthRemaining match {
-        case n if n <= 0 =>
-          // you've bottomed out
-          (partsSoFar, p)
-        case _ if node == null || node.children.size < 1 =>
-          // you've not bottomed out, but you have no children
-          (partsSoFar, p)
-        case _ =>
-          // there's some depth left, and you have at least one child
-          val recursives: Seq[(List[U], Double)] = node.children.toList.map(child =>
-            getMostFrequentParts(partsSoFar ++ List(child._1), node.count, depthRemaining - 1))
-          // use only the highest-frequency expectation among all of your child values
-          val (parts, frequency) = recursives.sortWith((a, b) => a._2 < b._2).last
-          (parts, p * frequency)
-      }
-    }
-
-    // you must start with a beginning-of-sequence token (which does not accumulate against the count)
-    val (parts, frequency) = getMostFrequentParts(List(ev.StartPart), count, maxDepth)
-
-    // simple validation
-    if (parts.head != ev.StartPart)
-      throw new Exception(s"Invalid most-frequent sequence; does not begin with start-token:  ${parts.map(_.toString).mkString(", ")}")
-
-    (parts, frequency)
-  }
-
   def sampleValue: Option[U] = randomChild.map(_.value)
+
+  // It is often necessary to find the penultimate node in a sequence.
+  // This routine is responsible for doing that.
 
   // special case:
   // if the parts-so-far already end in an end-of-sequence marker,
@@ -291,6 +407,8 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     children.foldLeft(initial)((soFar, child) => soFar + child._2.countValues(target))
   }
 
+  // utility method to ensure that we haven't done anything horrible in the
+  // construction of our tree to violate key assumptions
   def validate {
     if (value != ev.emptyPart)
       throw new Exception(s"Root node should be empty; instead was:  <$value>}")
