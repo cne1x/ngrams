@@ -470,5 +470,19 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
     }
   }
 
+  // meant to be called only on root
   def sequenceIterator: Iterator[Seq[U]] = _sequenceIterator.map(_.tail)
+
+  // meant to be called only on root
+  def sequenceAssociationCounts(seq: Seq[U]): List[Int] = {
+    // iterate over all possible sequences (for which the order is fixed)
+    val seqItr: Iterator[Seq[U]] = sequenceIterator
+
+    val thisSeqEnd = seq.tail
+    val thisSeqStart = seq.dropRight(1)
+    seqItr.map(otherSeq => {
+      if (seq != otherSeq && (thisSeqEnd == otherSeq.dropRight(1) || otherSeq.tail == thisSeqStart)) 1
+      else 0
+    }).toList
+  }
 }

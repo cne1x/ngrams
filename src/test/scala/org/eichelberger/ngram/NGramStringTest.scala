@@ -73,7 +73,32 @@ class NGramStringTest extends Specification {
         println(s"[SEQ $sizeSoFar] $seq")
         sizeSoFar + 1
       })
-      itrSize must be equalTo 13
+      itrSize must be equalTo ngram.numTerminals.toInt
+    }
+
+    "build a square, symmetric sequence association matrix correctly" in {
+      val presentations = Set(
+        "foo",
+        "bar",
+        "baz",
+        "qux0r"
+      )
+
+      val ngram = presentations.foldLeft(NGram[String,String](3))(
+        (ngSoFar, presentation) => ngSoFar + presentation)
+      val m = ngram.numTerminals.toInt
+
+      val itr = ngram.sequenceIterator
+      itr must not beNull;
+      val matrix = itr.foldLeft(List.empty[List[Int]])((mSoFar, seq) => {
+        val assoc = ngram.sequenceAssociationCounts(seq)
+        mSoFar ++ List(assoc)
+      })
+      println(matrix)
+      for (row <- 0 until m; col <- 0 until m) {
+        matrix(row)(col) must be equalTo matrix(col)(row)
+      }
+      matrix.size must be equalTo m
     }
 
     "goof off for fun" in {
