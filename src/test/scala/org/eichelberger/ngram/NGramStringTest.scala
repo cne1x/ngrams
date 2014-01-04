@@ -76,29 +76,109 @@ class NGramStringTest extends Specification {
       itrSize must be equalTo ngram.numTerminals.toInt
     }
 
-    "build a square, symmetric sequence association matrix correctly" in {
+    "build a square, symmetric sequence association matrix correctly, and reduce it" in {
       val presentations = Set(
         "foo",
         "bar",
         "baz",
-        "qux0r"
+        "qux0r",
+        "barsoom",
+        "barstool",
+        "toadstool",
+        "barfood"
       )
 
       val ngram = presentations.foldLeft(NGram[String,String](3))(
         (ngSoFar, presentation) => ngSoFar + presentation)
       val m = ngram.numTerminals.toInt
 
+      // build the association matrix
       val itr = ngram.sequenceIterator
       itr must not beNull;
       val matrix = itr.foldLeft(List.empty[List[Int]])((mSoFar, seq) => {
         val assoc = ngram.sequenceAssociationCounts(seq)
         mSoFar ++ List(assoc)
       })
-      println(matrix)
+
+      // validate the association matrix
+      println(s"[ASSOCIATION MATRIX] $matrix")
       for (row <- 0 until m; col <- 0 until m) {
         matrix(row)(col) must be equalTo matrix(col)(row)
       }
       matrix.size must be equalTo m
+
+      // remember the initial row sums
+      val sums: Seq[Int] = (0 until m).map(row => matrix(row).sum)
+
+      // identify those rows whose sum is greater than 1
+      // (that is, the probe is not subsumed in another sequence)
+      val nontrivialSums: List[(Int, Int)] = sums.zipWithIndex.
+        sortWith((a,b) => a._1 > b._1).
+        filter(_._1 > 1).
+        toList
+
+      // remove as many of these non-trivial probes as possible, in order
+      val (finalSums, finalIdxs) = nontrivialSums.foldLeft((sums, (0 until m).toSet))((soFar, sumPair) => {
+        val (sumsSoFar, idxsSoFar) = soFar
+        val (_, rowIdx) = sumPair
+        val rowValues: List[Int] = matrix(rowIdx)
+
+        val newSums: Seq[Int] = (0 until m).map(i => sumsSoFar(i) - rowValues(i))
+        val canRemoveThisIdx: Boolean = !newSums.exists(_ < 1)
+
+        println(s"[consider reducing] $rowIdx : $newSums -> $canRemoveThisIdx")
+
+        if (canRemoveThisIdx) (newSums, idxsSoFar - rowIdx)
+        else (sumsSoFar, idxsSoFar)
+      })
+      println(s"[INITIAL SUMS] $sums")
+      println(s"[REDUCED SUMS] $finalSums")
+      println(s"[REDUCED INDEXES] ${finalIdxs.toList.sorted}")
+
+      //@TODO move this out, and make it more abstract
+      case class Probe(seq: Seq[String]) {
+        override def toString: String =
+          if (seq.size > 0) seq.mkString("['", "', '", "']")
+          else "[]"
+
+        val PartLead = "<"
+        val PartSeparator = "~"
+        val PartClose = ">"
+
+        lazy val compString: String = seq.mkString(PartLead, PartClose + PartSeparator + PartLead, PartClose)
+
+        def apply(x: String): Boolean = {
+          val xSeq: Seq[String] = obj.decompose(x).toList
+          val xStr: String = xSeq.mkString(PartLead, PartClose + PartSeparator + PartLead, PartClose)
+
+          //println(s"[probing] $xStr contains $compString = ${xStr.indexOf(compString)}")
+
+          //@TODO make this search less sucky
+          xStr.indexOf(compString) >= 0
+        }
+      }
+
+      // list the final probe-set
+      val allProbes: List[Probe] = ngram.sequenceIterator.toList.map(seq => Probe(seq))
+      finalIdxs.foreach { idx =>
+        println(s"[PROBE] ${allProbes(idx)}")
+      }
+
+      // list the probe-result-vector for each of the input samples
+      presentations.foreach { input =>
+        val vector: Seq[String] = finalIdxs.toSeq.map(idx => {
+          val probe = allProbes(idx)
+          val probeResult = probe(input)
+          //println(s"[single probe result] #$idx $probe ($input) = $probeResult")
+
+          if (probeResult) "1"
+          else "0"
+        })
+        println(s"[PROBE VECTOR] $input -> ${vector.mkString(" ")}")
+      }
+
+      //@TODO put a real condition here
+      1 must be equalTo 1
     }
 
     "goof off for fun" in {

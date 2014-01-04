@@ -485,4 +485,14 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
       else 0
     }).toList
   }
+
+  // meant to be called only on root
+  def sequenceAssociationMatrixRowIterator: Iterator[Seq[Int]] = {
+    // iterate over all possible sequences (for which the order is fixed)
+    // these are the rows of the association matrix
+    val seqItr: Iterator[Seq[U]] = sequenceIterator
+
+    // for each row, fetch the associations for every other sequence (n^2)
+    seqItr.map(seq => sequenceAssociationCounts(seq))
+  }
 }
