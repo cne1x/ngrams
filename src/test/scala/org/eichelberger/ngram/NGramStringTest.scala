@@ -52,6 +52,30 @@ class NGramStringTest extends Specification {
       ngram.maxDepthPresented must be equalTo 7
     }
 
+    "count, and iterate through, terminals correctly" in {
+      val presentations = Set(
+        "foo",
+        "bar",
+        "baz",
+        "qux0r"
+      )
+
+      val ngram = presentations.foldLeft(NGram[String,String](3))(
+        (ngSoFar, presentation) => ngSoFar + presentation)
+
+      ngram.prettyPrint()
+
+      ngram.numTerminals must be equalTo 13
+
+      val itr = ngram.sequenceIterator
+      itr must not beNull;
+      val itrSize = itr.foldLeft(0)((sizeSoFar, seq) => {
+        println(s"[SEQ $sizeSoFar] ${seq.tail}")
+        sizeSoFar + 1
+      })
+      itrSize must be equalTo 13
+    }
+
     "goof off for fun" in {
       // transitions range from a window size of 2 (nonsense) to 10 (recapitulation)
       val windowSize = 5

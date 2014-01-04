@@ -434,4 +434,39 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
   // assumes that every presentation begins with a START token
   // defined by the evidence parameter
   def presentationCount: Long = countValues(ev.StartPart)
+
+  // count the number of leaf nodes (terminals)
+  lazy val numTerminals: Long = {
+    Math.max(1L, children.foldLeft(0L)((tSoFar, child) => tSoFar + child._2.numTerminals))
+  }
+
+  // iterator through the various terminals (as paths from root)
+  def sequenceIterator: Iterator[Seq[U]] = new Iterator[Seq[U]] {
+    var index = 0
+    var childItr: Option[Iterator[NGram[T,U]]] =
+      if (children.size == 0) None
+      else Option(children.valuesIterator)
+    var source: Iterator[Seq[U]] = nextSource()
+
+    def nextSource(): Iterator[Seq[U]] = childItr match {
+      case None => Seq(Seq()).iterator
+      case Some(ngramItr) => ngramItr.next().sequenceIterator
+    }
+
+    def hasNext: Boolean = index == 0 || index < numTerminals
+
+    def next(): Seq[U] = {
+      // sanity check
+      if (!hasNext) throw new Exception("Iterator exhausted.")
+
+      index = index + 1
+
+      if (source.hasNext) Seq(value) ++ source.next()
+      else {
+        source = nextSource()
+        if (source.hasNext) Seq(value) ++ source.next()
+        else throw new Exception(s"Unexpected iterator exhaustion")
+      }
+    }
+  }
 }
