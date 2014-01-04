@@ -70,7 +70,7 @@ class NGramStringTest extends Specification {
       val itr = ngram.sequenceIterator
       itr must not beNull;
       val itrSize = itr.foldLeft(0)((sizeSoFar, seq) => {
-        println(s"[SEQ $sizeSoFar] ${seq.tail}")
+        println(s"[SEQ $sizeSoFar] $seq")
         sizeSoFar + 1
       })
       itrSize must be equalTo 13

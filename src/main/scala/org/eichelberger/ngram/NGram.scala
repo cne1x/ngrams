@@ -441,7 +441,7 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
   }
 
   // iterator through the various terminals (as paths from root)
-  def sequenceIterator: Iterator[Seq[U]] = new Iterator[Seq[U]] {
+  private def _sequenceIterator: Iterator[Seq[U]] = new Iterator[Seq[U]] {
     var index = 0
     var childItr: Option[Iterator[NGram[T,U]]] =
       if (children.size == 0) None
@@ -450,7 +450,7 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
 
     def nextSource(): Iterator[Seq[U]] = childItr match {
       case None => Seq(Seq()).iterator
-      case Some(ngramItr) => ngramItr.next().sequenceIterator
+      case Some(ngramItr) => ngramItr.next()._sequenceIterator
     }
 
     def hasNext: Boolean = index == 0 || index < numTerminals
@@ -469,4 +469,6 @@ case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], wind
       }
     }
   }
+
+  def sequenceIterator: Iterator[Seq[U]] = _sequenceIterator.map(_.tail)
 }
