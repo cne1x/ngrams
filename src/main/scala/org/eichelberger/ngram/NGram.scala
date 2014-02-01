@@ -1,5 +1,7 @@
 package org.eichelberger.ngram
 
+import scala.collection.immutable.TreeMap
+
 /**
  * An n-gram -- see http://en.wikipedia.org/wiki/N-gram -- is a tree structure that
  * summarizes sequences by counting transitions between elements, with the maximum
@@ -106,13 +108,13 @@ object NGram {
   val NoWindowSize = 0
 
   def apply[T, U](windowSize: Int = NoWindowSize)(implicit ev: SegmentLike[T, U]): NGram[T, U] =
-    new NGram[T, U](ev.emptyPart, 0L, Map.empty[U, NGram[T,U]], windowSize, 0)(ev)
+    new NGram[T, U](ev.emptyPart, 0L, TreeMap.empty[U, NGram[T,U]], windowSize, 0)(ev)
 
   def apply[T, U](value: U, windowSize: Int = NoWindowSize)(implicit ev: SegmentLike[T, U]): NGram[T, U] =
-    new NGram[T, U](value, 1L, Map.empty[U, NGram[T,U]], windowSize, 1)(ev)
+    new NGram[T, U](value, 1L, TreeMap.empty[U, NGram[T,U]], windowSize, 1)(ev)
 
   def apply[T, U](value: U, windowSize: Int, maxDepth: Int)(implicit ev: SegmentLike[T, U]): NGram[T, U] =
-    new NGram[T, U](value, 1L, Map.empty[U, NGram[T,U]], windowSize, maxDepth)(ev)
+    new NGram[T, U](value, 1L, TreeMap.empty[U, NGram[T,U]], windowSize, maxDepth)(ev)
 
   def fromWhole[T, U](whole: T, windowSize: Int = NoWindowSize)(implicit ev: SegmentLike[T, U]): NGram[T, U] = {
     val parts: List[U] = ev.decompose(whole).toList
@@ -135,6 +137,7 @@ object NGram {
 }
 
 import NGram._
+import scala.collection.immutable.TreeMap
 
 /**
  * The n-gram is a recursive data structure, representing both a tree and a node.
@@ -149,7 +152,7 @@ import NGram._
  * @tparam U the sequence-element type (such as "letter within a word")
  */
 
-case class NGram[T, U](value: U, count: Long, children: Map[U, NGram[T,U]], windowSize: Int, maxDepthPresented: Int)(implicit ev: SegmentLike[T, U]) {
+case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], windowSize: Int, maxDepthPresented: Int)(implicit ev: SegmentLike[T, U]) {
   // a window-size of 1 is degenerate
   require(windowSize == NoWindowSize || windowSize > 1)
 

@@ -18,4 +18,6 @@ object SegmentGeohashBinary extends SegmentLike[GeoHash, String] {
   def combine(wholeSoFar: GeoHash, part: String) =
     binaryStringToGeohash(wholeSoFar.toBinaryString + Option(part).getOrElse(""))
   def disassemble(whole: GeoHash): Iterator[String] = whole.toBinaryString.iterator.map(_.toString)
+
+  def compare(a: String, b: String): Int = a.compareTo(b)
 }

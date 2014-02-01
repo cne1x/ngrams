@@ -10,5 +10,6 @@ object SegmentString extends SegmentLike[String, String] {
     Option(wholeSoFar).getOrElse("") + Option(part).getOrElse("")
   override def assemble(parts: Iterator[String]): String = parts.mkString
   def disassemble(whole: String): Iterator[String] = whole.iterator.map(_.toString)
+  def compare(a: String, b: String): Int = a.compareTo(b)
 }
 

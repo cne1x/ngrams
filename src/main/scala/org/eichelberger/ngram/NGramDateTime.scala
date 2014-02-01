@@ -32,5 +32,7 @@ object SegmentDateTime extends SegmentLike[DateTime, String] {
   def dt2s(dt: DateTime): String = dtf.withZone(UTC).print(dt)
 
   def s2dt(s: String): DateTime = dtf.parseDateTime(s).withZone(UTC)
+
+  def compare(a: String, b: String): Int = a.compareTo(b)
 }
 

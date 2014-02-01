@@ -11,7 +11,7 @@ package org.eichelberger.ngram
  * such as window size, etc.
  */
 
-trait SegmentLike[T, U] {
+trait SegmentLike[T, U] extends Ordering[U] {
   case class Extraction(part: U, remainder: T)
 
   val StartPart: U
@@ -48,5 +48,7 @@ trait SegmentLike[T, U] {
   }
   def partToString(part: U): String = part.toString
   def wholeToString(whole: T): String = whole.toString
+
+  def compare(a: U, b: U): Int
 }
 

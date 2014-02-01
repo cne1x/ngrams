@@ -11,4 +11,5 @@ object SegmentSentence extends SegmentLike[String,String] {
   def disassemble(whole: String): Iterator[String] = {
     whole.replaceAll("([;.\\-)(,?:\"!])", " $1 ").toUpperCase.trim.split("\\s+").iterator
   }
+  def compare(a: String, b: String): Int = a.compareTo(b)
 }
