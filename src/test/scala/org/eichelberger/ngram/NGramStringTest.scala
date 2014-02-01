@@ -76,6 +76,28 @@ class NGramStringTest extends Specification {
       itrSize must be equalTo ngram.numTerminals.toInt
     }
 
+    "scale counts correctly" in {
+      val presentations = Set(
+        "foo",
+        "food",
+        "baz",
+        "bazzer"
+      )
+
+      val ngram = presentations.foldLeft(NGram[String,String](3))(
+        (ngSoFar, presentation) => ngSoFar + presentation)
+      val ngramScaled = ngram * 10
+
+
+      println("[RAW NGRAM]")
+      ngram.prettyPrint()
+      println("[SCALED NGRAM]")
+      ngramScaled.prettyPrint()
+
+      // test
+      ngramScaled.toString must be equalTo "'':3:160=<'_BOS_':3:40=<'b':3:20=<'a':3:20=<>>, 'f':3:20=<'o':3:20=<>>>, 'a':3:20=<'z':3:20=<'_EOS_':3:10=<>, 'z':3:10=<>>>, 'b':3:20=<'a':3:20=<'z':3:20=<>>>, 'e':3:10=<'r':3:10=<'_EOS_':3:10=<>>>, 'f':3:20=<'o':3:20=<'o':3:20=<>>>, 'o':3:30=<'d':3:10=<'_EOS_':3:10=<>>, 'o':3:20=<'_EOS_':3:10=<>, 'd':3:10=<>>>, 'z':3:20=<'e':3:10=<'r':3:10=<>>, 'z':3:10=<'e':3:10=<>>>>"
+    }
+
     "estimate lexical distances correctly" in {
       val presentations = Set(
         "foo",

@@ -186,6 +186,13 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
     })
   }
 
+  // multiply all counts by the given factor, and return the resulting ngram
+  def *(factor: Long): NGram[T, U] = {
+    // recurse into children
+    val newChildren: TreeMap[U, NGram[T,U]] = children.map { case (k,v) => (k, v * factor) }
+    this.copy(count = count * factor, children = newChildren)
+  }
+
   // yields the result of adding a new sequence to this n-gram
   def +(whole: T): NGram[T, U] = this + NGram.fromWhole[T, U](whole, this.windowSize)
 
