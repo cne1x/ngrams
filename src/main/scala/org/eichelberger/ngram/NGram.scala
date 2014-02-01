@@ -70,15 +70,15 @@ import scala.collection.immutable.TreeMap
  *   |       |
  *   |       +-- am
  *   |
- *   +-- i (2)
- *   |   |
- *   |   +-- am (2)
- *   |
  *   +-- am (2)
  *   |   |
  *   |   +-- what
  *   |   |
  *   |   +-- [END]
+ *   |
+ *   +-- i (2)
+ *   |   |
+ *   |   +-- am (2)
  *   |
  *   +-- what
  *       |
@@ -100,6 +100,13 @@ import scala.collection.immutable.TreeMap
  * To implement n-grams, we have chosen a two-part approach:  This file represents
  * the destination for data, the n-gram itself; the other part is the SegmentLike
  * trait that defines the type of sequence data that can be stored in an n-gram.
+ *
+ * ADDITIONAL NOTE ON ORDERING:  Children are now ordered according to their
+ * natural types.  This is so that lexical (in-n-gram) distances can be computed
+ * reliably.  If the n-gram summarizes family names, then the distance between
+ * "Hively" and "Eichelberger" can only be consistently reported if the n-gram
+ * children are ordered deterministically.
+ *
  */
 
 // an n-gram must be built on top of a type that is segmented
@@ -138,6 +145,10 @@ object NGram {
 
 import NGram._
 import scala.collection.immutable.TreeMap
+
+sealed trait Direction
+case object Above extends Direction
+case object Below extends Direction
 
 /**
  * The n-gram is a recursive data structure, representing both a tree and a node.
@@ -443,7 +454,7 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
 
   // assumes that every presentation begins with a START token
   // defined by the evidence parameter
-  def presentationCount: Long = countValues(ev.StartPart)
+  lazy val numPresentations: Long = countValues(ev.StartPart)
 
   // count the number of leaf nodes (terminals)
   lazy val numTerminals: Long = {
@@ -505,4 +516,70 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
     // for each row, fetch the associations for every other sequence (n^2)
     seqItr.map(seq => sequenceAssociationCounts(seq))
   }
+
+  // returns the number of instances known to PRECEDE the given instance
+  def numBelow(whole: T): Long = numDirection(ev.decompose(whole).toList, Below)
+
+  // returns the number of instances known to FOLLOW the given instance
+  def numAbove(whole: T): Long = numDirection(ev.decompose(whole).toList, Above)
+
+  // meant to be called only on root
+  private def numDirection(parts: List[U], direction: Direction): Long = {
+    // generate all windowed sub-sequences (after the START)
+    val windows: List[List[U]] = parts.sliding(windowSize).toList
+
+    def inDirection(a: U, b: U): Boolean = direction match {
+      case Above => ev.compare(a, b) > 0
+      case Below => ev.compare(a, b) < 0
+    }
+
+    def _getDirection(ng: NGram[T,U], window: List[U]): (Long, Boolean) = {
+      if (window.size < 1) (0L, ng.children.size == 0)
+      else {
+        if (!ng.children.contains(window.head))
+          (ng.children.filter(child => inDirection(child._1, window.head)).map { case(k,v) => v.count }.sum, false)
+        else {
+          val ofChildren = ng.children.filter(child => inDirection(child._1, window.head)).map { case(k,v) => v.count }.sum
+          val recurse = _getDirection(ng.children(window.head), window.tail)
+          (ofChildren + recurse._1, recurse._2)
+        }
+      }
+    }
+
+    val num: Long = windows.foldLeft((0L, true))((t, windowAll) => {
+      val (numSoFar, valid) = t
+
+      if (valid) {
+        val window = windowAll
+        val recurse: (Long, Boolean) = if (children.contains(window.head)) {
+          _getDirection(children(window.head), window.tail)
+        } else {
+          (0L, true)
+        }
+        (numSoFar + recurse._1, recurse._2)
+      } else {
+        t
+      }
+    })._1
+
+    num
+  }
+
+  // if there are T total sequences that contributed to the n-gram,
+  // what would be the index of the given sequence in that sorted
+  // list; if the given sequence was not a presentation (i.e., cannot
+  // be found in the n-gram), then it's reported position is half-way
+  // between the two closest sequences; indexes start range over [0, T-1]
+  def getRelativePosition(whole: T): Double = {
+    val below: Double = numBelow(whole).toDouble
+    val above: Double = numAbove(whole).toDouble
+
+    //@TODO debug!
+    //println(s"[RELATIVE POSITION] whole $whole below $below above $above")
+
+    below + 0.5 * (numPresentations - below - above)
+  }
+
+  def getLexicalDifference(a: T, b: T): Double =
+    Math.abs(getRelativePosition(a) - getRelativePosition(b)) / numPresentations.toDouble
 }
