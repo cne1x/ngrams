@@ -456,6 +456,11 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
   // defined by the evidence parameter
   lazy val numPresentations: Long = countValues(ev.StartPart)
 
+  // only care about unique sequences (each starting with a
+  // START token)
+  lazy val numUniquePresentations: Long =
+    children.get(ev.StartPart).map(_.children.size.toLong).getOrElse(0L)
+
   // count the number of leaf nodes (terminals)
   lazy val numTerminals: Long = {
     Math.max(1L, children.foldLeft(0L)((tSoFar, child) => tSoFar + child._2.numTerminals))
@@ -518,13 +523,15 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
   }
 
   // returns the number of instances known to PRECEDE the given instance
-  def numBelow(whole: T): Long = numDirection(ev.decompose(whole).toList, Below)
+  def numBelow(whole: T, onlyUnique: Boolean = true): Long =
+    numDirection(ev.decompose(whole).toList, Below, onlyUnique)
 
   // returns the number of instances known to FOLLOW the given instance
-  def numAbove(whole: T): Long = numDirection(ev.decompose(whole).toList, Above)
+  def numAbove(whole: T, onlyUnique: Boolean = true): Long =
+    numDirection(ev.decompose(whole).toList, Above, onlyUnique)
 
   // meant to be called only on root
-  private def numDirection(parts: List[U], direction: Direction): Long = {
+  private def numDirection(parts: List[U], direction: Direction, onlyUnique: Boolean = true): Long = {
     // generate all windowed sub-sequences (after the START)
     val windows: List[List[U]] = parts.sliding(windowSize).toList
 
@@ -533,13 +540,18 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
       case Below => ev.compare(a, b) < 0
     }
 
+    // how to count:  whether only by uniques (default) or by distribution
+    val kvCountFnx: ((U, NGram[T,U])) => Long = (t) =>
+      if (onlyUnique) 1L
+      else t._2.count
+
     def _getDirection(ng: NGram[T,U], window: List[U]): (Long, Boolean) = {
       if (window.size < 1) (0L, ng.children.size == 0)
       else {
         if (!ng.children.contains(window.head))
-          (ng.children.filter(child => inDirection(child._1, window.head)).map { case(k,v) => v.count }.sum, false)
+          (ng.children.filter(child => inDirection(child._1, window.head)).map(kvCountFnx).sum, false)
         else {
-          val ofChildren = ng.children.filter(child => inDirection(child._1, window.head)).map { case(k,v) => v.count }.sum
+          val ofChildren = ng.children.filter(child => inDirection(child._1, window.head)).map(kvCountFnx).sum
           val recurse = _getDirection(ng.children(window.head), window.tail)
           (ofChildren + recurse._1, recurse._2)
         }
@@ -570,16 +582,25 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
   // list; if the given sequence was not a presentation (i.e., cannot
   // be found in the n-gram), then it's reported position is half-way
   // between the two closest sequences; indexes start range over [0, T-1]
-  def getRelativePosition(whole: T): Double = {
-    val below: Double = numBelow(whole).toDouble
-    val above: Double = numAbove(whole).toDouble
+  def getRelativePosition(whole: T, onlyUnique: Boolean = true): Long = {
+    val below: Long = numBelow(whole, onlyUnique)
+    val above: Long = numAbove(whole, onlyUnique)
+    val total: Long =
+      if (onlyUnique) numUniquePresentations
+      else numPresentations
 
     //@TODO debug!
-    //println(s"[RELATIVE POSITION] whole $whole below $below above $above")
+    println(s"[RELATIVE POSITION] whole $whole below $below above $above #presentations $numPresentations onlyUnique $onlyUnique -> ${(below << 1L) + (numPresentations - below - above)}")
 
-    below + 0.5 * (numPresentations - below - above)
+    (below << 1L) + (total - below - above)
   }
 
-  def getLexicalDifference(a: T, b: T): Double =
-    Math.abs(getRelativePosition(a) - getRelativePosition(b)) / numPresentations.toDouble
+  def getLexicalDifference(a: T, b: T, onlyUnique: Boolean = true): Double = {
+    val total: Long =
+      if (onlyUnique) numUniquePresentations
+      else numPresentations
+    0.5 *
+      Math.abs(getRelativePosition(a, onlyUnique) - getRelativePosition(b, onlyUnique)).toDouble /
+      total.toDouble
+  }
 }

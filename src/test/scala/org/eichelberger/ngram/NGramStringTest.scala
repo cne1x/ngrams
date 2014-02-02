@@ -116,28 +116,41 @@ class NGramStringTest extends Specification {
       println("[LEXICAL BASIS]")
       ngram.prettyPrint()
 
-      def testPos(s: String, expected: Double) = {
-        val idx = ngram.getRelativePosition(s)
+      def testPos(s: String, expected: Long, onlyUnique: Boolean = true) = {
+        val idx = ngram.getRelativePosition(s, onlyUnique)
         println(s"  [LEXICAL INDEX] $s -> $idx")
         idx must be equalTo expected
       }
 
-      def testDiff(a: String, b: String, expected: Double) = {
-        val diff = ngram.getLexicalDifference(a, b)
+      def testDiff(a: String, b: String, expected: Double, onlyUnique: Boolean) = {
+        val diff = ngram.getLexicalDifference(a, b, onlyUnique)
         println(s"  [LEXICAL DISTANCE] ($a, $b) -> $diff")
         diff must be equalTo expected
       }
 
-      testPos("foo", 3.5)
-      testPos("bar", 1.0)
-      testPos("cat", 2.0)
-      testPos("aaa", 0.0)
-      testPos("zzz", 5.0)
+      testPos("foo", 7, false)
+      testPos("bar", 2, false)
+      testPos("cat", 4, false)
+      testPos("aaa", 0, false)
+      testPos("zzz", 10, false)
 
-      testDiff("bar", "cat", 0.2)
-      testDiff("zzz", "aaa", 1.0)
-      testDiff("foo", "foo", 0.0)
-      testDiff("cat", "cat", 0.0)
+      testDiff("foo", "bar", 0.50, false)
+      testDiff("bar", "cat", 0.20, false)
+      testDiff("zzz", "aaa", 1.00, false)
+      testDiff("foo", "foo", 0.00, false)
+      testDiff("cat", "cat", 0.00, false)
+
+      testPos("foo", 3, true)
+      testPos("bar", 1, true)
+      testPos("cat", 2, true)
+      testPos("aaa", 0, true)
+      testPos("zzz", 4, true)
+
+      testDiff("foo", "bar", 0.50, true)
+      testDiff("bar", "cat", 0.25, true)
+      testDiff("zzz", "aaa", 1.00, true)
+      testDiff("foo", "foo", 0.00, true)
+      testDiff("cat", "cat", 0.00, true)
     }
   }
 }
