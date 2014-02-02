@@ -67,7 +67,7 @@
       <file leaf-file-name="NGram.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGram.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="607" column="6" selection-start="25967" selection-end="25967" vertical-scroll-proportion="0.0" vertical-offset="9680" max-vertical-offset="10591">
+            <state line="621" column="2" selection-start="26430" selection-end="26430" vertical-scroll-proportion="0.0" vertical-offset="9748" max-vertical-offset="10761">
               <folding />
             </state>
           </provider>
@@ -76,7 +76,7 @@
       <file leaf-file-name="NGramStringTest.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramStringTest.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="0" selection-start="296" selection-end="296" vertical-scroll-proportion="0.34056762" vertical-offset="0" max-vertical-offset="2584">
+            <state line="176" column="0" selection-start="5402" selection-end="5402" vertical-scroll-proportion="0.7445743" vertical-offset="2546" max-vertical-offset="3145">
               <folding>
                 <element signature="e#32#59#0" expanded="true" />
               </folding>
@@ -654,7 +654,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16805845" sideWeight="0.67099565" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32842106" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32842106" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1024,14 +1024,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/org/eichelberger/ngram/NGram.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="607" column="6" selection-start="25967" selection-end="25967" vertical-scroll-proportion="0.0" vertical-offset="9680" max-vertical-offset="10591">
+        <state line="621" column="2" selection-start="26430" selection-end="26430" vertical-scroll-proportion="0.0" vertical-offset="9748" max-vertical-offset="10761">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/org/eichelberger/ngram/NGramStringTest.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="0" selection-start="296" selection-end="296" vertical-scroll-proportion="0.34056762" vertical-offset="0" max-vertical-offset="2584">
+        <state line="176" column="0" selection-start="5402" selection-end="5402" vertical-scroll-proportion="0.7445743" vertical-offset="2546" max-vertical-offset="3145">
           <folding>
             <element signature="e#32#59#0" expanded="true" />
           </folding>

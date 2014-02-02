@@ -616,4 +616,14 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
       Math.abs(getRelativePosition(a) - getRelativePosition(b)).toDouble /
       total.toDouble
   }
+
+  // the minimum number of bits required to differentiate among this many
+  // (non-unique!) presentations
+  lazy val probePrecision: Int = Math.ceil(Math.log(numPresentations << 1L) / Math.log(2.0)).toInt
+
+  def getRelativePositionBits(whole: T): Seq[Boolean] = {
+    val index = getRelativePosition(whole)
+    val bitString = index.toBinaryString.reverse.padTo(probePrecision, '0').reverse
+    bitString.map(_ == '1')
+  }
 }

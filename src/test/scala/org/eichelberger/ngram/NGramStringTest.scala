@@ -142,5 +142,38 @@ class NGramStringTest extends Specification {
       testDiff("foo", "foo", 0.00)
       testDiff("cat", "cat", 0.00)
     }
+
+    "report probe vectors" in {
+      // presentation -> count
+      val data = Map(
+        "bar" -> 2,
+        "baz" -> 1,
+        "foo" -> 3
+      )
+      val windowSize = 3
+
+      val ngram = data.foldLeft(NGram[String,String](windowSize))(
+        (ngSoFar, kv) => {
+          val (presentation, count) = kv
+          val addNG = NGram.fromWhole(presentation, windowSize) * count
+          ngSoFar + addNG
+        })
+
+      ngram.probePrecision must be equalTo 4
+
+      def testProbeVector(s: String, v: Seq[Boolean]) = {
+        val idx = ngram.getRelativePosition(s)
+        val vv = ngram.getRelativePositionBits(s)
+        println(s"[PROBE VECTOR] '$s' -> $idx = $vv expected $v")
+        vv must be equalTo v
+      }
+
+      testProbeVector("aaa", Seq(false, false, false, false))
+      testProbeVector("bar", Seq(false, false, true, false))
+      testProbeVector("baz", Seq(false, true, false, true))
+      testProbeVector("cat", Seq(false, true, true, false))
+      testProbeVector("foo", Seq(true, false, false, true))
+      testProbeVector("zzz", Seq(true, true, false, false))
+    }
   }
 }
