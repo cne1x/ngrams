@@ -523,15 +523,15 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
   }
 
   // returns the number of instances known to PRECEDE the given instance
-  def numBelow(whole: T, onlyUnique: Boolean = true): Long =
-    numDirection(ev.decompose(whole).toList, Below, onlyUnique)
+  def numBelow(whole: T): Long =
+    numDirection(ev.decompose(whole).toList, Below)
 
   // returns the number of instances known to FOLLOW the given instance
-  def numAbove(whole: T, onlyUnique: Boolean = true): Long =
-    numDirection(ev.decompose(whole).toList, Above, onlyUnique)
+  def numAbove(whole: T): Long =
+    numDirection(ev.decompose(whole).toList, Above)
 
   // meant to be called only on root
-  private def numDirection(parts: List[U], direction: Direction, onlyUnique: Boolean = true): Long = {
+  private def numDirection(parts: List[U], direction: Direction): Long = {
     // generate all windowed sub-sequences (after the START)
     val windows: List[List[U]] = parts.sliding(windowSize).toList
 
@@ -541,40 +541,57 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
     }
 
     // how to count:  whether only by uniques (default) or by distribution
-    val kvCountFnx: ((U, NGram[T,U])) => Long = (t) =>
-      if (onlyUnique) 1L
-      else t._2.count
+    val kvCountFnx: ((U, NGram[T,U])) => Long = (t) => t._2.count
 
-    def _getDirection(ng: NGram[T,U], window: List[U]): (Long, Boolean) = {
-      if (window.size < 1) (0L, ng.children.size == 0)
+    def _getDirection(ng: NGram[T,U], window: List[U]): Long = {
+      if (window.size < 1) 0L
       else {
         if (!ng.children.contains(window.head))
-          (ng.children.filter(child => inDirection(child._1, window.head)).map(kvCountFnx).sum, false)
+          ng.children.filter(child => inDirection(child._1, window.head)).map(kvCountFnx).sum
         else {
           val ofChildren = ng.children.filter(child => inDirection(child._1, window.head)).map(kvCountFnx).sum
           val recurse = _getDirection(ng.children(window.head), window.tail)
-          (ofChildren + recurse._1, recurse._2)
+
+          //@TODO debug!
+          //println(s"  [MATCH] $direction ng $ng window $window ofChildren $ofChildren recurse $recurse ")
+
+          ofChildren + recurse
         }
       }
     }
 
-    val num: Long = windows.foldLeft((0L, true))((t, windowAll) => {
+    // for full windows, you only care about the first transition
+    val fullWindows = windows.filter(_.size == windowSize)
+    val numFull: Long = fullWindows.foldLeft((0L, true))((t, fullWindow) => {
       val (numSoFar, valid) = t
 
       if (valid) {
-        val window = windowAll
-        val recurse: (Long, Boolean) = if (children.contains(window.head)) {
-          _getDirection(children(window.head), window.tail)
-        } else {
-          (0L, true)
-        }
-        (numSoFar + recurse._1, recurse._2)
-      } else {
-        t
-      }
+        val (numFullLocal: Long, stillValid: Boolean) =
+          if (children.contains(fullWindow.head)) {
+            val grandchildren: Map[U, NGram[T,U]] = children(fullWindow.head).children
+            (grandchildren.filter(grandchild => inDirection(grandchild._1, fullWindow.drop(1).head)).map(kvCountFnx).sum,
+              grandchildren.contains(fullWindow.drop(1).head))
+          } else (0L, false)
+
+        //println(s"  [$direction FULL ${if (valid) "valid" else "INVALID"}] transition [${fullWindow.head}, ${fullWindow.drop(1).head}] -> $numSoFar + $numFullLocal")
+
+        (numSoFar + numFullLocal, valid && stillValid)
+      } else (numSoFar, false)
     })._1
 
-    num
+    // for partial windows, you care about all transitions
+    val partialWindows: List[List[U]] = windows.filter(_.size < windowSize)
+    val numPartial: Long = partialWindows.foldLeft(0L)((numPartialSoFar, partialWindow) => {
+      numPartialSoFar +
+        (if (children.contains(partialWindow.head))
+          _getDirection(children(partialWindow.head), partialWindow.tail)
+        else 0L)
+    })
+
+    //@TODO debug!
+    //println(s"[$direction] parts $parts -> full $numFull + partial $numPartial")
+
+    numFull + numPartial
   }
 
   // if there are T total sequences that contributed to the n-gram,
@@ -582,25 +599,21 @@ case class NGram[T, U](value: U, count: Long, children: TreeMap[U, NGram[T,U]], 
   // list; if the given sequence was not a presentation (i.e., cannot
   // be found in the n-gram), then it's reported position is half-way
   // between the two closest sequences; indexes start range over [0, T-1]
-  def getRelativePosition(whole: T, onlyUnique: Boolean = true): Long = {
-    val below: Long = numBelow(whole, onlyUnique)
-    val above: Long = numAbove(whole, onlyUnique)
-    val total: Long =
-      if (onlyUnique) numUniquePresentations
-      else numPresentations
+  def getRelativePosition(whole: T): Long = {
+    val below: Long = numBelow(whole)
+    val above: Long = numAbove(whole)
+    val total: Long =numPresentations
 
     //@TODO debug!
-    println(s"[RELATIVE POSITION] whole $whole below $below above $above #presentations $numPresentations onlyUnique $onlyUnique -> ${(below << 1L) + (numPresentations - below - above)}")
+    //println(s"[RELATIVE POSITION] whole $whole below $below above $above #presentations $total -> ${below + total - above}")
 
-    (below << 1L) + (total - below - above)
+    below + total - above
   }
 
-  def getLexicalDifference(a: T, b: T, onlyUnique: Boolean = true): Double = {
-    val total: Long =
-      if (onlyUnique) numUniquePresentations
-      else numPresentations
+  def getLexicalDifference(a: T, b: T): Double = {
+    val total: Long = numPresentations
     0.5 *
-      Math.abs(getRelativePosition(a, onlyUnique) - getRelativePosition(b, onlyUnique)).toDouble /
+      Math.abs(getRelativePosition(a) - getRelativePosition(b)).toDouble /
       total.toDouble
   }
 }
