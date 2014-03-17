@@ -9,6 +9,24 @@ import java.io.BufferedInputStream
 import scala.io.Source
 import org.joda.time.format.DateTimeFormat
 
+/**
+ * The GDELT data set -- see gdeltproject.org -- contains geo-time data
+ * extracted from plain-text news stories.  To test some of the n-grams,
+ * we have aggregated the data so that each unique 30-bit GeoHash'ed
+ * location gets one line in our summary file, formatted as follows:
+ *
+ *      YYYYMMDD     GeoHash     count
+ *
+ * The date is the first with which the location was ever associated with
+ * an event in GDELT.  As you would expect, even though there are more
+ * news sources read as time went by, there are fewer and fewer unique
+ * locations associated with any single date as the dates grow later.
+ *
+ * The purpose of such a format is to allow us to reconstruct (at least
+ * at 30-bit precision) the progression of summary n-grams built from
+ * GDELT.
+ */
+
 @RunWith(classOf[JUnitRunner])
 class GDELTTest extends Specification {
   implicit val obj_NG_DT = SegmentDateTime
@@ -16,15 +34,36 @@ class GDELTTest extends Specification {
   implicit val obj_NG_S = SegmentString
   val windowSize = 5
 
+  val gdeltDTF = DateTimeFormat.forPattern("yyyyMMdd")
+
+  // a single entry from this summary file of GDELT data
+  object GdeltEntry {
+    // alternate constructor from a single, unparsed string
+    def apply(unparsed: String): GdeltEntry = {
+      val fields = unparsed.split("\t")
+      apply(fields)
+    }
+    // alternate constructor from a single, unparsed string
+    def apply(fields: Array[String]): GdeltEntry = {
+      require(fields.size == 3, s"Expected 3 tab-separated fields; found ${fields.size}")
+      val dt = gdeltDTF.parseDateTime(fields(0))
+      val gh = GeoHash(fields(1))
+      val num = fields(2).toLong
+
+      GdeltEntry(dt, gh, num)
+    }
+  }
+  case class GdeltEntry(when: DateTime, where: GeoHash, count: Long)
+
   // self-closing wrapper for a GDELT subset
-  def GDELT(sampleSize: Int = 100, dropSize: Int = 0) = new Iterable[Array[String]] {
+  def GDELT(sampleSize: Int = 100, dropSize: Int = 0) = new Iterable[GdeltEntry] {
     val reNumber = """^[+\-]?[0-9]+(\.[0-9]+)?"""
     val reDate = """^[12][09]\d\d[01]\d[0123]\d$"""
-    def iterator = new Iterator[Array[String]] {
+    def iterator = new Iterator[GdeltEntry] {
       // open the file
-      val resource = getClass.getClassLoader.getResource("gdelt-50K.tsv")
-      val src = Source.fromURL(resource, "Unicode")
-      val lines = src.getLines.map(_.split("\t")).filter(_.size == 57).filter(f => f(53).matches(reNumber) && f(54).matches(reNumber) && f(1).matches(reDate))
+      val resource = getClass.getClassLoader.getResource("gdelt-firsts.tsv")
+      val src = Source.fromURL(resource)
+      val lines = src.getLines.map(_.split("\t")).filter(_.size == 3).filter(f => f(0).matches(reDate))
       val netLines = if (sampleSize > 0) lines.drop(dropSize).take(sampleSize) else lines.drop(dropSize)
       var isClosed: Boolean = false
       def hasNext: Boolean = {
@@ -36,8 +75,8 @@ class GDELTTest extends Specification {
         }
         !isClosed && netLines.hasNext
       }
-      def next: Array[String] =
-        if (hasNext) netLines.next
+      def next: GdeltEntry =
+        if (hasNext) GdeltEntry(netLines.next)
         else throw new Exception("File contains no more lines.")
     }
   }
@@ -105,26 +144,6 @@ class GDELTTest extends Specification {
     }
   }
 
-  def fields2gh(fields: Array[String], precision: Int = 35): GeoHash = {
-    val x = fields(54)
-    val y = fields(53)
-    GeoHash(x.toDouble, y.toDouble, precision)
-  }
-
-  val gdeltDTF = DateTimeFormat.forPattern("yyyyMMdd")
-  def fields2dt(fields: Array[String]): DateTime = {
-    val dts = fields(1)
-    gdeltDTF.parseDateTime(dts)
-  }
-
-  case class Entry(gh: GeoHash, dt: DateTime)
-
-  object Entry {
-    def fromFields(fields: Array[String]): Entry = Entry(fields2gh(fields), fields2dt(fields))
-  }
-
-
-
   def recommendSchema(ngGH: NGram[GeoHash, String], ngDT: NGram[String, String], threshold: Double = 0.05): Schema = {
     val ghScores = (5 to 35 by 5).map(ghb => {
       val r = ngGH.getMostFrequent(ghb)
@@ -176,11 +195,10 @@ class GDELTTest extends Specification {
       val engGH = NGram[GeoHash, String](windowSize)
       val engDT = NGram[String, String](windowSize)
 
-      val pair = GDELT(0, 0).foldLeft((engGH, engDT))((t, fields) => t match { case (ngGHSoFar, ngDTSoFar) =>
-        val entry = Entry.fromFields(fields)
+      val pair = GDELT(1000, 0).foldLeft((engGH, engDT))((t, entry) => t match { case (ngGHSoFar, ngDTSoFar) =>
         (
-          ngGHSoFar + entry.gh,
-          ngDTSoFar + obj_NG_DT.dt2s(entry.dt)
+          ngGHSoFar + entry.where,
+          ngDTSoFar + obj_NG_DT.dt2s(entry.when)
         )
       })
 
@@ -189,7 +207,7 @@ class GDELTTest extends Specification {
       val schema = recommendSchema(ngGH, ngDT, 0.01)
       println(s"Schema:  $schema")
 
-      schema must be equalTo Schema(BitsSpecification(5,6),BitsSpecification(2,0),BitsSpecification(0,11))
+      schema must be equalTo Schema(BitsSpecification(2,17),BitsSpecification(2,0),BitsSpecification(3,0))
     }
   }
 }
